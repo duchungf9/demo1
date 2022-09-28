@@ -98,7 +98,7 @@ class N289
             $_cp['cachdanh'] = $this->validateTail($_cp);
         }
         $this->getSoDanh($cuphap);
-        $this->varExpDie(json_encode($cuphap));
+        $this->varExpDie("API:" . json_encode($cuphap));
         $cuphap = array_sort($cuphap, 'dai', SORT_DESC);
         $table = "<table>";
         $table .= "<thead><tr><td>Đài</td><td>Số đánh</td><td>Cách đánh</td><td>Tiền đánh</td><td>note</td></tr></thead>";
@@ -267,7 +267,7 @@ class N289
         } else {
             $query = "/$dai ?(.+)/"; // đài cuối
         }
-        $this->varExpDie($query);
+//        $this->varExpDie($query);
         preg_match_all($query, $input, $matches);
         return $matches[1][0] ?? "";
     }

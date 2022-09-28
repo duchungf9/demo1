@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dfabe318-210c-4b5e-a4b6-d66cb5653a0e" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.php" afterPath="$PROJECT_DIR$/index.php" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -29,22 +29,27 @@
       <file leaf-file-name="index.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="498">
-              <caret line="225" column="47" lean-forward="true" selection-start-line="225" selection-start-column="47" selection-end-line="225" selection-end-column="47" />
+            <state relative-caret-position="348">
+              <caret line="100" column="34" lean-forward="false" selection-start-line="100" selection-start-column="34" selection-end-line="100" selection-end-column="34" />
               <folding>
-                <marker date="1664373422028" expanded="true" signature="3041:3047" ph=" " />
-                <marker date="1664373422028" expanded="true" signature="3059:3065" ph=" " />
-                <marker date="1664373422028" expanded="true" signature="3074:3080" ph=" " />
-                <marker date="1664373422028" expanded="true" signature="3095:3101" ph=" " />
-                <marker date="1664373422028" expanded="true" signature="9852:9904" ph="..." />
-                <marker date="1664373422028" expanded="true" signature="9867:9897" ph="{...}" />
-                <marker date="1664373422028" expanded="true" signature="9943:10074" ph="..." />
+                <marker date="1664373651628" expanded="true" signature="3050:3056" ph=" " />
+                <marker date="1664373651628" expanded="true" signature="3068:3074" ph=" " />
+                <marker date="1664373651628" expanded="true" signature="3083:3089" ph=" " />
+                <marker date="1664373651628" expanded="true" signature="3104:3110" ph=" " />
+                <marker date="1664373651628" expanded="true" signature="9863:9915" ph="..." />
+                <marker date="1664373651628" expanded="true" signature="9878:9908" ph="{...}" />
+                <marker date="1664373651628" expanded="true" signature="9954:10085" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>varExpDie</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -129,7 +134,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1664370936489</updated>
-      <workItem from="1664370937670" duration="2551000" />
+      <workItem from="1664370937670" duration="2692000" />
     </task>
     <task id="LOCAL-00001" summary="danh lien">
       <created>1664373458663</created>
@@ -142,7 +147,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2551000" />
+    <option name="totallyTimeSpent" value="2692000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -155,6 +160,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="2578" height="1408" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25080258" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -164,7 +170,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917705" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32917705" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32917705" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="RNConsole" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15461347" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -195,16 +201,16 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/index.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="498">
-          <caret line="225" column="47" lean-forward="true" selection-start-line="225" selection-start-column="47" selection-end-line="225" selection-end-column="47" />
+        <state relative-caret-position="348">
+          <caret line="100" column="34" lean-forward="false" selection-start-line="100" selection-start-column="34" selection-end-line="100" selection-end-column="34" />
           <folding>
-            <marker date="1664373422028" expanded="true" signature="3041:3047" ph=" " />
-            <marker date="1664373422028" expanded="true" signature="3059:3065" ph=" " />
-            <marker date="1664373422028" expanded="true" signature="3074:3080" ph=" " />
-            <marker date="1664373422028" expanded="true" signature="3095:3101" ph=" " />
-            <marker date="1664373422028" expanded="true" signature="9852:9904" ph="..." />
-            <marker date="1664373422028" expanded="true" signature="9867:9897" ph="{...}" />
-            <marker date="1664373422028" expanded="true" signature="9943:10074" ph="..." />
+            <marker date="1664373651628" expanded="true" signature="3050:3056" ph=" " />
+            <marker date="1664373651628" expanded="true" signature="3068:3074" ph=" " />
+            <marker date="1664373651628" expanded="true" signature="3083:3089" ph=" " />
+            <marker date="1664373651628" expanded="true" signature="3104:3110" ph=" " />
+            <marker date="1664373651628" expanded="true" signature="9863:9915" ph="..." />
+            <marker date="1664373651628" expanded="true" signature="9878:9908" ph="{...}" />
+            <marker date="1664373651628" expanded="true" signature="9954:10085" ph="..." />
           </folding>
         </state>
       </provider>
