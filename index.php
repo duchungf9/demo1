@@ -1,0 +1,306 @@
+<?php
+
+class N289
+{
+    public $input;
+
+    public function __construct(string $input = null)
+    {
+        $this->input = $input;
+    }
+
+    /*
+     * get tên đài
+     */
+    private function getDai(): array
+    {
+        return [
+            'dt', 'dth', 'dthap', 'dongthap', 'cm', 'cmau', 'camau',
+            'vt', 'vtau', 'vungtau',
+            'bl', 'blieu', 'baclieu',
+            'ct', 'ctho', 'cantho',
+            'st', 'strang', 'soctrang', 'str',
+            'ag', 'agiang', 'angiang',
+            'bt', 'bth', 'bthuan', 'binhthuan',
+            'bd', 'bduong', 'sb', 'sbe', 'songbe', 'binhduong',
+            'tv', 'tvinh', 'trv', 'travinh',
+            'la', 'lan', 'longan',
+            'bp', 'bphuoc', 'bph', 'binhphuoc',
+            'hg', 'hgiang', 'haugiang',
+            'kg', 'kgiang', 'kiengiang',
+            'dl', 'dla', 'dalat'
+        ];
+    }
+
+    /*
+     * validate các đài
+     */
+    public function run(string $input): string
+    {
+
+        $this->varExpDie($input);
+        $array_dai = $this->getDai();
+        $str_dai = implode("|", $array_dai);
+        //((dongthap|cmau|travinh|trv|vt|kiengiang|dalat|lan|soctrang)+ )+ ?+|\d{2}[d]|\d{1}[d] \d+
+        $queryGetDai = "/(($str_dai)+ )+ ?+|\d{2}[d]|\d{1}[d] \d+/";
+        preg_match_all($queryGetDai, $input, $matches);
+        $array_cacDai  = $matches[0];
+        $cuphap = [];
+        $this->validateDai($array_cacDai, $array_dai);
+        foreach($array_cacDai as $indexDai => $dai){
+            $dai = trim($dai);
+            $cuphap[] = [
+                'dai'  => $dai,
+                'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
+            ];
+        }
+
+        foreach($cuphap as &$_cp){
+            $_cp['cachdanh'] = $this->validateTail($_cp);
+        }
+        $this->varExpDie($array_cacDai);
+        $this->varExpDie($cuphap);
+        return "";
+
+    }
+
+    private function getMessageWhenError(string $tail, array $cuphap){
+        echo "-----------";
+        $messages = [];
+//      '/((\d+)+ ?)+? ([a-z]+) (\d+)/';
+        $query_thieu_sodanh = '/[a-z]+ \d+/'; // cú pháp thiếu phần 1
+        preg_match_all($query_thieu_sodanh, $tail, $matches_sodanh);
+        if(!empty($matches_sodanh[0])){
+            $messages[] = "Thiếu số đánh";
+        }
+
+        $query_thieu_cachdanh = '/\d+? \d+/'; // cú pháp thiếu phần 1
+        preg_match_all($query_thieu_cachdanh, $tail, $matches_cachdanh);
+        if(!empty($matches_cachdanh[0])){
+            $messages[] = "Thiếu cách đánh";
+        }
+
+        $query_thieu_tiendanh = '/\d+? [a-z]+/'; // cú pháp thiếu phần 1
+        preg_match_all($query_thieu_tiendanh, $tail, $matches_tiendanh);
+        if(!empty($matches_tiendanh[0])){
+            $messages[] = "Thiếu tiền đánh";
+        }
+
+        if(count($messages) == 0){
+            return "Cú pháp phần đánh của đài {$cuphap['dai']} bị sai";
+
+
+        }
+        return implode(", ", $messages);
+    }
+
+
+    private function validateTail(array $cuphap){
+        $tail = $cuphap['tail'];
+        // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
+        $query = '/((\d+|\d\d\d\dk\d\d\d\d)+ ?)+? [a-z]+ \d+/';
+        preg_match_all($query, $tail, $matches);
+        $not_matches = preg_split($query , $tail);
+        if(!empty($not_matches[0])){
+            return "Lỗi cú pháp ở đoạn {$not_matches[0]}";
+        }
+        $array_cuphap_cachdanh =  $matches[0];
+//        $this->varExpDie(count($array_cuphap_cachdanh) . "-----");
+
+        if(count($array_cuphap_cachdanh) == 0){
+            return $this->getMessageWhenError($tail, $cuphap);
+            return "Lỗi cú pháp ở đoạn {$cuphap['dai']}  {$tail}";
+        }
+        $result = [];
+        foreach($array_cuphap_cachdanh as $cuphap_cachdanh){
+            $result[] = $cuphap_cachdanh;
+        }
+
+        return $result;
+    }
+
+
+
+    private function getSoKeo(string $string_soKeo): array
+    {
+        $result = [];
+        $query = '/([0-9]{4})k([0-9]{4})/';
+        $regex = preg_match_all($query, trim($string_soKeo), $matches);
+
+        if (!empty($matches[1][0]) && !empty($matches[2][0])) {
+            $from = (int)$matches[1][0];
+            $to = (int)$matches[2][0];
+
+            for ($i = $from; $i <= $to; $i++) {
+                $result[] = $this->padNum($i);
+            }
+        }
+
+        return $result;
+    }
+
+    private function getTheTailDai(string $dai, string $input, array $array_cacDai, int $indexDai) : string{
+        $next = $array_cacDai[$indexDai + 1] ?? "" ;
+        if(!empty($next)){
+            $query = "/$dai (.+) ($next)/";
+        }else{
+
+            $query = "/$dai (.+)/"; // đài cuối
+//            $this->varExpDie($query);
+        }
+        $this->varExpDie($query);
+        $this->varExpDie("----");
+        preg_match_all($query, $input, $matches);
+        return $matches[1][0] ?? "";
+    }
+
+    /*
+     * chỉ lấy ra các cú pháp chứa các đài đã config.
+     */
+    private function validateDai(array &$array_cacDai, array $array_dai) {
+        foreach($array_cacDai as $key=>$item){
+            $string_dais = explode(" ", trim($item));
+            foreach($string_dais as $dai){
+                if(!in_array($dai, $array_dai)){
+                    echo "Đài ". $dai. " Không tồn tại <br/>";
+                    unset($array_cacDai[$key]);
+                }
+            }
+        }
+
+        $array_cacDai = array_values($array_cacDai);
+    }
+
+    private function padNum(int $number): string
+    {
+        return str_pad($number, 4, 0, STR_PAD_LEFT);
+    }
+
+
+    private function varExp($vars)
+    {
+        echo '<pre>' . var_export($vars, true) . '</pre>';
+
+    }
+
+    private function varExpDie($vars)
+    {
+        return $this->varExp($vars);
+        die();
+    }
+
+
+}
+
+$loadModel = new N289();
+//$loadModel->getSoKeo("0000k9999");
+$loadModel->run("cmau dongthap trv 89 494 0000k1111 bao 40 60 bay 80 90 dd 100 kiengiang dalat lan 30 dd 100 travinh soctrang 20 dd 77");
+
+//function checkFnc($input_lines)
+//{
+//    if (isset($_GET['s'])) {
+//        $input_lines = $_GET['s'];
+//    }
+//    $input_lines = str_replace("  ", " ", trim($input_lines));
+//    $regex = preg_match_all('/(([a-zA-Z]+ ?)+|(\d{2}[d]) |(\d{1}[d])) ?+((\d+ ?)+) ?([a-zA-Z]+) ?(\d+)/', trim($input_lines), $output_array);
+//    $result = [];
+//    foreach ($output_array as $group_key => $group_matches) {
+//        foreach ($group_matches as $key => $item) {
+//            $result[$key][] = $item;
+//        }
+//    }
+//
+//    $matches = [];
+//    foreach ($result as $match) {
+//        $matches[] = getCorrect($match, $input_lines);
+//    }
+//    $output_string = $input_lines;
+//    $message = "";
+//    $correct_items = [];
+//    $wrong_items = [];
+//    foreach ($matches as $single_match) {
+//        $correct_items[] = $single_match[0];
+//        $output_string = str_replace($single_match[0], "__CORRECT_ITEM__", $output_string);
+//
+//        $text_map_array = [1 => "phần 1", 2 => "phần 2", 3 => "phần 3", 4 => "phần 4"];
+//        foreach ($text_map_array as $index => $value) {
+//            if (empty($single_match[$index])) {
+//                $message .= $value . ", ";
+//            }
+//        }
+//    }
+////    echo "<span style='color: red'>" . $output_string . "</span>" . (($message != "") ? "Không xác định được ". $message : "");
+////    echo "<br/>";
+//    $wrong_items = explode("__CORRECT_ITEM__", $output_string);
+//    echo "<br/>";
+//    echo "Những phần đúng <br/>";
+//    foreach ($correct_items as $item) {
+//        echo $item . "<br/>";
+//    }
+//    echo "<br/>";
+////
+////    echo "Những phần sai";
+////    foreach($wrong_items as $item){
+////        echo $item . "<br/>";
+////    }
+//    foreach ($wrong_items as $item) {
+//        secondCheck($item);
+//    }
+//    $_old = isset($_GET['s']) ? $_GET['s'] : "";
+//    echo "<form method='GET' action='/'>
+//            <textarea name='s' cols='100' rows='20'>{$_old}</textarea>
+//            <button type='submit'>Test</button>
+//    </form>";
+//
+//}
+//
+//function secondCheck($input_lines)
+//{
+//    $input_lines = str_replace("  ", " ", trim($input_lines));
+////    $regex = preg_match_all('/(([a-zA-Z]+ ?)+|(\d{2}[d]) |(\d{1}[d])) ?+((\d+ ?)+) ?([a-zA-Z]+) ?(\d+)/', trim($input_lines), $output_array);
+//    $regex_w_1 = preg_match_all('/((\d+ ?)+) ?([a-zA-Z]+) ?(\d+)/', trim($input_lines), $output_array1);
+//    $regex_w_2 = preg_match_all('/(([a-zA-Z]+ ?)+|(\d{2}[d]) |(\d{1}[d])) ?+([a-zA-Z]+) ?(\d+)/', trim($input_lines), $output_array2);
+//    $regex_w_3 = preg_match_all('/(([a-zA-Z]+ ?)+|(\d{2}[d]) |(\d{1}[d])) ?+((\d+ ?)+) ?(\d+)/', trim($input_lines), $output_array3);
+//    $regex_w_4 = preg_match_all('/(([a-zA-Z]+ ?)+|(\d{2}[d]) |(\d{1}[d])) ?+((\d+ ?)+) ?([a-zA-Z]+) ?/', trim($input_lines), $output_array4);
+//    foreach ($output_array1[0] as $_item_1) {
+//        if ($_item_1 != "") {
+//            echo $_item_1 . "( thiếu phần 1)<br/>";
+//        }
+//    }
+//    foreach ($output_array2[0] as $_item_1) {
+//        if ($_item_1 != "") {
+//            echo $_item_1 . "( thiếu phần 2)<br/>";
+//        }
+//    }
+//    foreach ($output_array3[0] as $_item_1) {
+//        if ($_item_1 != "") {
+//            echo $_item_1 . "( thiếu phần 3)<br/>";
+//        }
+//    }
+//    foreach ($output_array4[0] as $_item_1) {
+//        if ($_item_1 != "") {
+//            echo $_item_1 . "( thiếu phần 4)<br/>";
+//        }
+//    }
+//
+//
+//}
+//
+//
+//function getCorrect($match, $input_lines)
+//{
+//    return ([$match[0], $match[1], $match[5], $match[7], $match[8]]);
+//}
+
+
+
+
+//checkFnc("dc ct 44 99 da30 dd100 b30 99 dd500 9944 b10 baodao5 ok
+//91 81 13 b10 da15 391 381 b10 xc30 313 b10 xc20 9391 8381 b5 ok
+//9900 6969 b1 ok
+//16 61 da15 16 b50 32 duoi 300 ok
+//49 67 27 65 da2 dd30 49 27 b25 765 b5 xc30 583 b3 16 61 b20 da10 ok");
+
+
+
+
