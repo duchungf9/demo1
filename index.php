@@ -64,11 +64,11 @@ class N289
         $this->varExpDie(json_encode($cuphap));
 
         $table = "<table>";
-        $table .= "<thead><tr><td>Đài</td><td>Số đánh</td><td>cách đánh</td><td>Tiền đánh</td></tr></thead>";
+        $table .= "<thead><tr><td>Đài</td><td>Số đánh</td><td>Cách đánh</td><td>Tiền đánh</td><td>note</td></tr></thead>";
         $table .= "<tbody>";
         foreach ($cuphap as $cp) {
-            $_str_cp = is_array($cp['cachdanh']) ? implode("<br/>", $cp['cachdanh']) : $cp['cachdanh'];
-            $table .= "<tr><td>&nbsp;{$cp['dai']}&nbsp;</td><td>&nbsp;{$cp['sodanh']}&nbsp;</td><td>{$_str_cp}</td><td></td></tr>";
+            $_str_cp = is_array($cp['cachdanh']) ? 'đúng' : $cp['cachdanh'];
+            $table .= "<tr><td>&nbsp;{$cp['dai']}&nbsp;</td><td>&nbsp;{$cp['sodanh']}&nbsp;</td><td>{$cp['type']}</td><td>{$cp['tiendanh']}</td><td>{$_str_cp}</td></tr>";
         }
         $table .= "</tbody>";
         $table .= "</table>";
@@ -94,6 +94,9 @@ class N289
                     preg_match_all($query, $item, $matches);
                     $array_sodanh = explode(" ",$matches[1][0]);
                     $array_dai = explode(" ", $cp['dai']);
+//                    $this->varExpDie($matches);
+                    $tiendanh = $matches[3][0];
+                    $typedanh = $matches[2][0];
                     foreach($array_sodanh as $sodanh){
                         if(!empty($sodanh)){
                             foreach($array_dai as $dai){
@@ -105,7 +108,9 @@ class N289
                                         $result[] = [
                                             'dai' => $dai,
                                             'sodanh' => $sokeo,
-                                            'cachdanh'=> $cp['cachdanh']
+                                            'cachdanh'=> $cp['cachdanh'],
+                                            'tiendanh'=>$tiendanh,
+                                            'type'=>$typedanh,
                                         ];
                                     }
 
@@ -113,7 +118,9 @@ class N289
                                     $result[] = [
                                         'dai' => $dai,
                                         'sodanh' => $sodanh,
-                                        'cachdanh'=> $cp['cachdanh']
+                                        'cachdanh'=> $cp['cachdanh'],
+                                        'tiendanh'=>$tiendanh,
+                                        'type'=>$typedanh,
                                     ];
                                 }
                             }
@@ -129,7 +136,9 @@ class N289
                 $result[] = [
                     'dai' => $cp['dai'],
                     'sodanh' => "Sai cú pháp",
-                    'cachdanh'=> $cp['cachdanh']
+                    'cachdanh'=> $cp['cachdanh'],
+                    'tiendanh'=>$tiendanh,
+                    'type'=>$typedanh,
                 ];
             }
 
