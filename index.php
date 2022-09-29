@@ -69,7 +69,7 @@ class N289
     }
 
     private function getType(){
-        return ['bay','bao','dd'];
+        return ['bay','bao','dd','dat'];
     }
 
     /*
@@ -85,6 +85,8 @@ class N289
         preg_match_all($queryGetDai, $input, $matches);
 //        $this->varExpDie($matches);
         $array_cacDai = $matches[1];
+//        $this->varExp($queryGetDai);
+//        $this->varExp($matches);
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
@@ -93,6 +95,7 @@ class N289
                 'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
             ];
         }
+
 
         foreach ($cuphap as &$_cp) {
             $_cp['cachdanh'] = $this->validateTail($_cp);
@@ -122,6 +125,8 @@ class N289
         $result = [];
 
         $type_str = "(".implode("|", $this->getType()).")";
+//        $this->varExpDie($cuphap);
+
         foreach($cuphap as $cp){
             $cachdanh = $cp['cachdanh'];
             if(is_array($cachdanh)){
@@ -132,7 +137,6 @@ class N289
                     preg_match_all($query, $item, $matches);
                     $array_sodanh = explode(" ",$matches[1][0]);
                     $array_dai = explode(" ", $cp['dai']);
-//                    $this->varExpDie($matches);
                     $tiendanh = $matches[3][0];
                     $typedanh = $matches[2][0];
                     foreach($array_sodanh as $sodanh){
@@ -216,26 +220,52 @@ class N289
     private function validateTail(array $cuphap)
     {
         $tail = $cuphap['tail'];
+
+        $str_type = implode("|", $this->getType());
         // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
         $query = '/((\d+|\d\d\d\dk\d\d\d\d)+ ?)+? [a-z]+ ?\d+/';
+        $query_2 = "/(($str_type) ?\d{1,2}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
         preg_match_all($query, $tail, $matches);
-        $not_matches = preg_split($query, $tail);
-
-
-        if (!empty($not_matches[0])) {
-            return "Lỗi cú pháp ở đoạn {$not_matches[0]}";
-        }
-        $array_cuphap_cachdanh = $matches[0];
+        preg_match_all($query_2, $tail, $matches2);
+        $result = [];
+        if(empty($matches2[0])){
+            $not_matches = preg_split($query, $tail);
+            if (!empty($not_matches[0])) {
+                return "Lỗi cú pháp ở đoạn {$not_matches[0]}: {$query}";
+            }
+            $array_cuphap_cachdanh = $matches[0];
+//            $this->varExp($matches[0]);
 //        $this->varExpDie(count($array_cuphap_cachdanh) . "-----");
 
-        if (count($array_cuphap_cachdanh) == 0) {
-            return $this->getMessageWhenError($tail, $cuphap);
-            return "Lỗi cú pháp ở đoạn {$cuphap['dai']}  {$tail}";
+            if (count($array_cuphap_cachdanh) == 0) {
+                return $this->getMessageWhenError($tail, $cuphap);
+                return "Lỗi cú pháp ở đoạn {$cuphap['dai']}  {$tail}";
+            }
+
+            foreach ($array_cuphap_cachdanh as $cuphap_cachdanh) {
+                $result[] = $cuphap_cachdanh;
+            }
+        }else{
+            // tách cú pháp.
+            $matched_string = $matches2[0][0];
+            $query_get_sodanh = "/(\d+[\s\S]{1,})+ $matched_string/";
+            preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
+//            $this->varExpDie($matches_sodanh);
+            $sodanh = $matches_sodanh[1][0];
+
+            $query_tach = "/($str_type) ?\d{1,}/";
+            preg_match_all($query_tach, $matches2[0][0], $matches3);
+            foreach($matches3[0] as $item){
+                $result[] = $sodanh." ".$item;
+            }
         }
-        $result = [];
-        foreach ($array_cuphap_cachdanh as $cuphap_cachdanh) {
-            $result[] = $cuphap_cachdanh;
-        }
+
+
+
+
+
+//        $this->varExpDie($not_matches);
+//        $this->varExpDie($result);
 
         return $result;
     }
@@ -267,8 +297,9 @@ class N289
         } else {
             $query = "/$dai ?(.+)/"; // đài cuối
         }
-//        $this->varExpDie($query);
+
         preg_match_all($query, $input, $matches);
+
         return $matches[1][0] ?? "";
     }
 
