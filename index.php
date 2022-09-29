@@ -248,6 +248,10 @@ class N289
         }else{
             // tách cú pháp.
             $matched_string = $matches2[0][0];
+            $not_matches = preg_split($query_2, $tail);
+            if(!empty($not_matches[1])){
+                return "Sai cú pháp ở: {$not_matches[1]}";
+            }
             $query_get_sodanh = "/(\d+[\s\S]{1,})+ $matched_string/";
             preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
 //            $this->varExpDie($matches_sodanh);
