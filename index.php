@@ -224,7 +224,7 @@ class N289
         $str_type = implode("|", $this->getType());
         // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
         $query = '/((\d+|\d\d\d\dk\d\d\d\d)+ ?)+? [a-z]+ ?\d+/';
-        $query_2 = "/(($str_type) ?\d{1,2}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
+        $query_2 = "/(($str_type) ?\d{1,3}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
         preg_match_all($query, $tail, $matches);
         preg_match_all($query_2, $tail, $matches2);
         $result = [];
@@ -248,9 +248,10 @@ class N289
         }else{
             // tách cú pháp.
             $matched_string = $matches2[0][0];
+            $this->varExpDie($matched_string);
             $not_matches = preg_split($query_2, $tail);
             if(!empty($not_matches[1])){
-                return "Sai cú pháp ở: {$not_matches[1]}";
+                return "[2]Sai cú pháp ở: {$not_matches[1]}";
             }
             $query_get_sodanh = "/(\d+[\s\S]{1,})+ $matched_string/";
             preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
