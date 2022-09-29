@@ -63,7 +63,8 @@ class N289
             'bp', 'bphuoc', 'bph', 'binhphuoc',
             'hg', 'hgiang', 'haugiang',
             'kg', 'kgiang', 'kiengiang',
-            'dl', 'dla', 'dalat'
+            'dl', 'dla', 'dalat',
+            '2d', '3d', '4d'
         ];
     }
 
@@ -79,10 +80,11 @@ class N289
 
         $array_dai = $this->getDai();
         $str_dai = implode("|", $array_dai);
-        //((dongthap|cmau|travinh|trv|vt|kiengiang|dalat|lan|soctrang)+ )+ ?+|\d{2}[d]|\d{1}[d] \d+
-        $queryGetDai = "/(($str_dai)+ )+ ?+|\d{2}[d]|\d{1}[d] \d+/";
+        //((($str_dai) ?)+) ?\d+
+        $queryGetDai = "/((($str_dai) ?)+) ?\d+/";
         preg_match_all($queryGetDai, $input, $matches);
-        $array_cacDai = $matches[0];
+//        $this->varExpDie($matches);
+        $array_cacDai = $matches[1];
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
@@ -96,7 +98,7 @@ class N289
             $_cp['cachdanh'] = $this->validateTail($_cp);
         }
         $this->getSoDanh($cuphap);
-        $this->varExpDie(json_encode($cuphap));
+        $this->varExpDie("API:" . json_encode($cuphap));
         $cuphap = array_sort($cuphap, 'dai', SORT_DESC);
         $table = "<table>";
         $table .= "<thead><tr><td>Đài</td><td>Số đánh</td><td>Cách đánh</td><td>Tiền đánh</td><td>note</td></tr></thead>";
@@ -125,6 +127,7 @@ class N289
             if(is_array($cachdanh)){
                 //(\d+|\d\d\d\dk\d\d\d\d) ?+(bay|bao|dd) ?(\d{1,})
                 $query = '/(.+) ?+'. $type_str .' ?(\d{1,})/';
+
                 foreach($cachdanh as $item){
                     preg_match_all($query, $item, $matches);
                     $array_sodanh = explode(" ",$matches[1][0]);
@@ -172,8 +175,8 @@ class N289
                     'dai' => $cp['dai'],
                     'sodanh' => "Sai cú pháp",
                     'cachdanh'=> $cp['cachdanh'],
-                    'tiendanh'=>$tiendanh,
-                    'type'=>$typedanh,
+                    'tiendanh'=>"",
+                    'type'=>"",
                 ];
             }
 
@@ -205,8 +208,6 @@ class N289
 
         if (count($messages) == 0) {
             return "Cú pháp phần đánh của đài {$cuphap['dai']} bị sai";
-
-
         }
         return implode(", ", $messages);
     }
@@ -216,7 +217,7 @@ class N289
     {
         $tail = $cuphap['tail'];
         // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
-        $query = '/((\d+|\d\d\d\dk\d\d\d\d)+ ?)+? [a-z]+ \d+/';
+        $query = '/((\d+|\d\d\d\dk\d\d\d\d)+ ?)+? [a-z]+ ?\d+/';
         preg_match_all($query, $tail, $matches);
         $not_matches = preg_split($query, $tail);
 
@@ -262,12 +263,11 @@ class N289
     {
         $next = $array_cacDai[$indexDai + 1] ?? "";
         if (!empty($next)) {
-            $query = "/$dai (.+) ($next)/";
+            $query = "/$dai ?(.+) ($next)/";
         } else {
-
-            $query = "/$dai (.+)/"; // đài cuối
-//            $this->varExpDie($query);
+            $query = "/$dai ?(.+)/"; // đài cuối
         }
+//        $this->varExpDie($query);
         preg_match_all($query, $input, $matches);
         return $matches[1][0] ?? "";
     }
