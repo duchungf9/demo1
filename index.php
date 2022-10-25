@@ -38,37 +38,95 @@ function array_sort($array, $on, $order=SORT_ASC)
 class N289
 {
     public $input;
+    public $dais, $cach_danh;
 
     public function __construct(string $input = null)
     {
         $this->input = $input;
+        $this->getDaiApi();
     }
+
+    private function getDaiApi(){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://ayeshop.com/mobile.php',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => [
+                'ver'=> '1.0', 'app_key'=>'MANTEK@150100',
+                'op'=>'mobile',
+                'act'=>'apilottery',
+                'type'=>0,
+                'plus'=>'list_dai'
+            ],
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        $data =  json_decode($response);
+        $this->dais = $data->data->tendai;
+        $this->cach_danh = $data->data->cachchoi;
+    }
+
 
     /*
      * get tên đài
      */
     private function getDai(): array
     {
-        return [
-            'dt', 'dth', 'dthap', 'dongthap', 'cm', 'cmau', 'camau',
-            'vt', 'vtau', 'vungtau',
-            'bl', 'blieu', 'baclieu',
-            'ct', 'ctho', 'cantho',
-            'st', 'strang', 'soctrang', 'str',
-            'ag', 'agiang', 'angiang',
-            'bt', 'bth', 'bthuan', 'binhthuan',
-            'bd', 'bduong', 'sb', 'sbe', 'songbe', 'binhduong',
-            'tv', 'tvinh', 'trv', 'travinh',
-            'la', 'lan', 'longan',
-            'bp', 'bphuoc', 'bph', 'binhphuoc',
-            'hg', 'hgiang', 'haugiang',
-            'kg', 'kgiang', 'kiengiang',
-            'dl', 'dla', 'dalat',
-            '2d', '3d', '4d'
-        ];
+        $data = $this->dais;
+        $result = [];
+        foreach($data as $item_array){
+            foreach($item_array as $items){
+                foreach($items as $dai){
+                    $result[] = $dai;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function getTenDai($ten_viet_tat){
+        $data = $this->dais;
+        $result = null;
+        foreach($data as $item_array){
+            foreach($item_array as $ten_dai => $items){
+                foreach($items as $dai){
+                    if($dai === $ten_viet_tat){
+                        $result = $ten_dai;
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     private function getType(){
+        $data = $this->cach_danh;
+        $results=[];
+        foreach($data as $value){
+            foreach($value as $items){
+                foreach($items as $_items){
+                    foreach($_items as $__items){
+                        foreach($__items as $item){
+                            $results[] = $item;
+                        }
+                    }
+
+                }
+
+            }
+        }
+        return $results;
         return ['bay','bao','dd','dat'];
     }
 
@@ -79,14 +137,13 @@ class N289
     {
 
         $array_dai = $this->getDai();
+        $this->varExpDie($array_dai);
+
         $str_dai = implode("|", $array_dai);
         //((($str_dai) ?)+) ?\d+
         $queryGetDai = "/((($str_dai) ?)+) ?\d+/";
         preg_match_all($queryGetDai, $input, $matches);
-//        $this->varExpDie($matches);
         $array_cacDai = $matches[1];
-//        $this->varExp($queryGetDai);
-//        $this->varExp($matches);
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
@@ -95,7 +152,6 @@ class N289
                 'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
             ];
         }
-
 
         foreach ($cuphap as &$_cp) {
             $_cp['cachdanh'] = $this->validateTail($_cp);
@@ -142,6 +198,7 @@ class N289
                     foreach($array_sodanh as $sodanh){
                         if(!empty($sodanh)){
                             foreach($array_dai as $dai){
+                                $dai = $this->getTenDai($dai);
                                 //kiểm tra có phải số kéo không?
                                 $get_so_keo = $this->getSoKeo($sodanh);
                                 if(count($get_so_keo) > 0){
