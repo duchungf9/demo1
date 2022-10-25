@@ -130,6 +130,28 @@ class N289
         return ['bay','bao','dd','dat'];
     }
 
+    private  function getTypeBySoDanh($sodanh){
+        $data = $this->cach_danh;
+        $results = [];
+        foreach($data as $value){
+            foreach($value as $key => $items){
+                if($sodanh == $key){
+                    foreach($items as $_items){
+                        foreach($_items as $__items){
+                            foreach($__items as $item){
+                                $results[] = $item;
+                            }
+
+                        }
+
+                    }
+                }
+
+            }
+        }
+        return $results;
+    }
+
     /*
      * validate các đài
      */
@@ -137,7 +159,6 @@ class N289
     {
 
         $array_dai = $this->getDai();
-        $this->varExpDie($array_dai);
 
         $str_dai = implode("|", $array_dai);
         //((($str_dai) ?)+) ?\d+
@@ -168,6 +189,14 @@ class N289
         }
         $table .= "</tbody>";
         $table .= "</table>";
+        if(is_array($cuphap)){
+            $unique = array_unique($cuphap, SORT_REGULAR);
+            if(count($cuphap) != count($unique)){
+                echo "<p>Có Đài Bị Trùng</p>";
+            }
+        }
+
+
 
         return $table;
 
@@ -191,10 +220,17 @@ class N289
 
                 foreach($cachdanh as $item){
                     preg_match_all($query, $item, $matches);
+                    $not_matches = preg_split($query, $item);
+                    if(isset($not_matches[0]) && $not_matches[0] != ''){
+                        echo "Không tồn tại cách đánh ($not_matches[0])"; die;
+                    }
+
                     $array_sodanh = explode(" ",$matches[1][0]);
+
                     $array_dai = explode(" ", $cp['dai']);
                     $tiendanh = $matches[3][0];
                     $typedanh = $matches[2][0];
+
                     foreach($array_sodanh as $sodanh){
                         if(!empty($sodanh)){
                             foreach($array_dai as $dai){
@@ -214,6 +250,13 @@ class N289
                                     }
 
                                 }else{
+                                    // kiểm tra xem là 2 con hay 3, 4 con
+                                    $strlen  = strlen($sodanh);
+                                    $types = $this->getTypeBySoDanh($strlen."con");
+                                    if(in_array($typedanh, $types) == false){
+
+                                        $cp['cachdanh'] = "cách đánh " . $strlen."con" . " không thể đánh " . $typedanh . "(".implode("|", $types).")";
+                                    }
                                     $result[] = [
                                         'dai' => $dai,
                                         'sodanh' => $sodanh,
