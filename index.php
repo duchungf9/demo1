@@ -366,9 +366,9 @@ class N289
             if(!empty($not_matches[1])){
                 return "[2]Sai cú pháp ở: {$not_matches[1]}";
             }
-            $query_get_sodanh = "/(\d+[\s\S]{1,})+ $matched_string/";
+            $query_get_sodanh = "/(\d{1,})+ $matched_string/";
             preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
-//            $this->varExpDie($matches_sodanh);
+            $this->varExpDie($matched_string);
             $sodanh = $matches_sodanh[1][0];
 
             $query_tach = "/($str_type) ?\d{1,}/";
