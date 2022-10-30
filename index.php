@@ -337,7 +337,7 @@ class N289
         $str_type = implode("|", $this->getType());
         // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
         $query = '/((\d+|\d{1,4}k\d{1,4})+ ?)+? [a-z]+ ?\d+/';
-        $query_2 = "/(($str_type|\d{1,4}k\d{1,4}) ?\d{1,3}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
+        $query_2 = "/(($str_type) ?\d{1,3}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
         preg_match_all($query, $tail, $matches);
         preg_match_all($query_2, $tail, $matches2);
         $result = [];
