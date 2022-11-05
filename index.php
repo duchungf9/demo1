@@ -38,7 +38,7 @@ function array_sort($array, $on, $order=SORT_ASC)
 class N289
 {
     public $input;
-    public $dais, $cach_danh;
+    public $dais, $cach_danh, $alldai;
     public $errors = null;
 
     public function __construct(string $input = null)
@@ -72,10 +72,27 @@ class N289
 
         curl_close($curl);
         $data =  json_decode($response);
+
         $this->dais = $data->data->tendai;
         $this->cach_danh = $data->data->cachchoi;
+        $this->alldai = $data->data->alldai;
     }
-
+    private function getAllDai(): array
+    {
+        $data = $this->alldai;
+        $result = [];
+        foreach($data as $item_array){
+            foreach($item_array as $items){
+                foreach($items as $dai){
+                    $result[] = $dai;
+                }
+            }
+        }
+        $result[] = '2d';
+        $result[] = '3d';
+        $result[] = '4d';
+        return $result;
+    }
 
     /*
      * get tên đài
@@ -91,7 +108,9 @@ class N289
                 }
             }
         }
-
+        $result[] = '2d';
+        $result[] = '3d';
+        $result[] = '4d';
         return $result;
     }
 
@@ -104,6 +123,29 @@ class N289
                     if($dai === $ten_viet_tat){
                         $result = $ten_dai;
                     }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function getCachChoi($ten_viet_tat){
+
+        $data = $this->cach_danh;
+        $result = null;
+        foreach($data as $item_array){
+            foreach($item_array as $ten_cach => $items){
+                foreach($items as $item){
+                    foreach($item as $it){
+                        foreach($it as $i){
+                            if($i === $ten_viet_tat){
+                                $result = $ten_cach;
+                            }
+                        }
+
+                    }
+
                 }
             }
         }
@@ -158,16 +200,20 @@ class N289
     public function run(string $input)
     {
 
-        $array_dai = $this->getDai();
+        $array_dai = $this->getAllDai();
 
         $str_dai = implode("|", $array_dai);
-        //((($str_dai) ?)+) ?\d+
+//        $this->varExpDie($str_dai);
+        //((($str_dai) ?)+) ?\d+g
         $queryGetDai = "/((($str_dai) ?)+) ?\d+/";
         preg_match_all($queryGetDai, $input, $matches);
         $array_cacDai = $matches[1];
+
+
         if(count($array_cacDai) == 0){
-            $this->errors = "Hom nay khong co dai ban danh. cac dai hom nay: $str_dai" ;
+            $this->errors = "dai khong ton tai: $str_dai" ;
         }
+
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
@@ -192,9 +238,13 @@ class N289
         $table .= "</tbody>";
         $table .= "</table>";
         if(is_array($cuphap)){
-            $unique = array_unique($cuphap, SORT_REGULAR);
-            if(count($cuphap) != count($unique)){
-                $this->errors = 'co dai bi trung';
+            $_cloneCuphap = $cuphap;
+            foreach($_cloneCuphap as &$_ccp){
+                $_ccp['dai'] = ($this->getTenDai($_ccp['dai'])); // convert về chung 1 dai
+            }
+            $unique = array_unique($_cloneCuphap, SORT_REGULAR);
+            if(count($_cloneCuphap) != count($unique)){
+                $this->errors = 'Đài bị trùng';
             }
         }
         $result = $cuphap;
@@ -202,10 +252,10 @@ class N289
             $result[] = ['error'=> 1, 'mes' => $this->errors];
         }
 
-        echo "Api";
-        echo "<br/>";
+//        echo "Api";
+//        echo "<br/>";
         echo json_encode($result);
-        return $table;
+//        return $table;
 
     }
 
@@ -215,21 +265,18 @@ class N289
      */
     private function getSoDanh(array &$cuphap){
         $result = [];
-
         $type_str = "(".implode("|", $this->getType()).")";
-//        $this->varExpDie($cuphap);
         foreach($cuphap as $cp){
             $cachdanh = $cp['cachdanh'];
             if(is_array($cachdanh)){
                 //(\d+|\d\d\d\dk\d\d\d\d) ?+(bay|bao|dd) ?(\d{1,})
                 $query = '/(.+) ?+'. $type_str .' ?(\d{1,})/';
-
+                $typeDanh_array = [];
                 foreach($cachdanh as $item){
                     preg_match_all($query, $item, $matches);
                     $not_matches = preg_split($query, $item);
                     if(isset($not_matches[0]) && $not_matches[0] != ''){
-                        $this->errors = 'khong ton tai cach danh ' . $not_matches[0] . "('cac cach danh hop le: $type_str')";
-//                        echo "Không tồn tại cách đánh ($not_matches[0])"; die;
+                        echo json_encode(['mes'=>'khong ton tai cach danh ' . $not_matches[0] . "('cac cach danh hop le: $type_str')",'error'=>1]); die;
                     }
 
                     $array_sodanh = explode(" ",$matches[1][0]);
@@ -238,17 +285,27 @@ class N289
                     $tiendanh = $matches[3][0];
                     $typedanh = $matches[2][0];
 
+                    if($typedanh == null || empty($typedanh)){
+                        echo json_encode(['mes'=>"Không tồn tại cách đánh: " . $cp['cachdanh']]);
+                    }else{
+                    }
+                    $typeDanh_array[] = $typedanh;
                     foreach($array_sodanh as $sodanh){
                         if(!empty($sodanh)){
                             foreach($array_dai as $dai){
+                                $shortcut_name = $dai;
                                 $dai = $this->getTenDai($dai);
+                                if(!in_array($shortcut_name, $this->getDai())){
+                                    echo json_encode(['mes'=> "Hôm nay không có đài: " . $shortcut_name,'error'=>1]); die;
+                                }
                                 //kiểm tra có phải số kéo không?
                                 $get_so_keo = $this->getSoKeo($sodanh);
                                 if(count($get_so_keo) > 0){
                                     // trường hợp số kéo.
                                     foreach($get_so_keo as $sokeo){
                                         $result[] = [
-                                            'dai' => $dai,
+                                            'tendai' => $dai,
+                                            'dai' => $shortcut_name,
                                             'sodanh' => $sokeo,
                                             'cachdanh'=> $cp['cachdanh'],
                                             'tiendanh'=>$tiendanh,
@@ -265,12 +322,13 @@ class N289
 
                                         $cp['cachdanh'] = "cách đánh " . $strlen."con" . " không thể đánh " . $typedanh . "(".implode("|", $types).")";
                                     }
-                                    if(!is_integer($sodanh)){
-                                        $this->errors = $sodanh . " Khong phai la so danh";
+                                    if(!is_int((int)$sodanh)){
+                                        echo json_encode(['mes'=>$sodanh . " Khong phai la so danh",'error'=>1]); die;
                                     }
 
                                     $result[] = [
-                                        'dai' => $dai,
+                                        'tendai' => $dai,
+                                        'dai' => $shortcut_name,
                                         'sodanh' => $sodanh,
                                         'cachdanh'=> $cp['cachdanh'],
                                         'tiendanh'=>$tiendanh,
@@ -283,6 +341,13 @@ class N289
 
                         }
 
+                    }
+                    foreach($typeDanh_array as &$_type){
+                        $_type = $this->getCachChoi($_type);
+                    }
+                    $unique_typedanh_array = array_unique($typeDanh_array);
+                    if(count($unique_typedanh_array) != count($typeDanh_array)){
+                        echo json_encode(['mes'=>'Có cách đánh bị trùng','error'=>1]);
                     }
                 }
 
@@ -336,7 +401,7 @@ class N289
 
         $str_type = implode("|", $this->getType());
         // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
-        $query = '/((\d+|\d{1,4}k\d{1,4})+ ?)+? [a-z]+ ?\d+/';
+        $query = '/((\d+|\d{1,4}k\d{1,4})+ ?)+? ?[a-z]+ ?\d+/';
         $query_2 = "/(($str_type) ?\d{1,3}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
         preg_match_all($query, $tail, $matches);
         preg_match_all($query_2, $tail, $matches2);
@@ -344,15 +409,14 @@ class N289
         if(empty($matches2[0])){
             $not_matches = preg_split($query, $tail);
             if (!empty($not_matches[0])) {
-                return "Lỗi cú pháp ở đoạn {$not_matches[0]}: {$query}";
+                echo json_encode(['mes'=>"Lỗi cú pháp ở đoạn {$not_matches[0]}: {$query}",'error'=>1]);
             }
             $array_cuphap_cachdanh = $matches[0];
-//            $this->varExp($matches[0]);
-//        $this->varExpDie(count($array_cuphap_cachdanh) . "-----");
 
             if (count($array_cuphap_cachdanh) == 0) {
-                return $this->getMessageWhenError($tail, $cuphap);
-                return "Lỗi cú pháp ở đoạn {$cuphap['dai']}  {$tail}";
+                echo json_encode(['mes'=>$this->getMessageWhenError($tail, $cuphap),'error'=>1]);
+
+
             }
 
             foreach ($array_cuphap_cachdanh as $cuphap_cachdanh) {
@@ -361,14 +425,12 @@ class N289
         }else{
             // tách cú pháp.
             $matched_string = $matches2[0][0];
-//            $this->varExpDie($matched_string);
             $not_matches = preg_split($query_2, $tail);
             if(!empty($not_matches[1])){
-                return "[2]Sai cú pháp ở: {$not_matches[1]}";
+                echo json_encode(['mes'=>"[2]Sai cú pháp ở: {$not_matches[1]}",'error'=>1]);
             }
             $query_get_sodanh = "/(\d{1,})+ $matched_string/";
             preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
-            $this->varExpDie($matched_string);
             $sodanh = $matches_sodanh[1][0];
 
             $query_tach = "/($str_type) ?\d{1,}/";
@@ -382,8 +444,7 @@ class N289
 
 
 
-//        $this->varExpDie($not_matches);
-//        $this->varExpDie($result);
+
 
         return $result;
     }
