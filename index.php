@@ -239,6 +239,9 @@ class N289
                 $ndai = $this->getNDai();
 
                 for($i=1;$i<=$number;$i++){
+                    if(!isset($ndai[$i])){
+                        echo json_encode(['m'=>'Hôm nay chỉ có ' . ($i-1) . " đài",'error'=>1]);die;
+                    }
                     $cuphap[] = [
                         'dai'  => $ndai[$i],
                         'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
