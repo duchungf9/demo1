@@ -114,6 +114,22 @@ class N289
         return $result;
     }
 
+    private function getNDai(){
+        $data = $this->dais;
+        $result = [];
+        foreach($data as $item_array){
+            foreach($item_array as $key=>$items){
+                foreach($items as $key => $dai){
+                    if($key==0){
+                        $result[] = $dai;
+                    }
+
+                }
+            }
+        }
+        return $result;
+    }
+
     private function getTenDai($ten_viet_tat){
         $data = $this->dais;
         $result = null;
@@ -217,10 +233,25 @@ class N289
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
-            $cuphap[] = [
-                'dai'  => $dai,
-                'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
-            ];
+            if(in_array($dai,['2d','3d','4d'])){
+                // lấy ra N đài đầu tiên.
+                $number = str_replace("d", "", $dai);
+                $ndai = $this->getNDai();
+
+                for($i=1;$i<=$number;$i++){
+                    $cuphap[] = [
+                        'dai'  => $ndai[$i],
+                        'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
+                    ];
+                }
+            }else{
+                $cuphap[] = [
+                    'dai'  => $dai,
+                    'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
+                ];
+            }
+
+
         }
         foreach ($cuphap as &$_cp) {
             $_cp['cachdanh'] = $this->validateTail($_cp);
@@ -527,13 +558,15 @@ class N289
 $_old = isset($_GET['s']) ? $_GET['s'] : "";
 $loadModel = new N289();
 //$loadModel->getSoKeo("0000k9999");
-echo "<style>table, th, td {
-  border: 1px solid black;
-}</style>";
-echo "<form method='GET' action='/'>
-            <textarea name='s' cols='100' rows='20'>{$_old}</textarea>
-            <button type='submit'>Test</button>
-    </form>";
+//echo "<style>table, th, td {
+//  border: 1px solid black;
+//}</style>";
+//echo "<form method='GET' action='/'>
+//            <textarea name='s' cols='100' rows='20'>{$_old}</textarea>
+//            <button type='submit'>Test</button>
+//    </form>";
+header('Content-Type: application/json; charset=utf-8');
+
 echo $loadModel->run($_old);
 
 //function checkFnc($input_lines)
