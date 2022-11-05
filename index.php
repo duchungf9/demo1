@@ -474,9 +474,18 @@ class N289
             }
         }
 
+        $cd_array = [];
+        foreach($result as $item){
+            $query2 = '/((\d+|\d{1,4}k\d{1,4})+ ?)+? ?([a-z]+) ?\d+/';
+            preg_match_all($query2, $item, $__matches);
+            $cachdanh = $__matches[3][0];
+            $cd_array[] = $cachdanh;
+        }
 
-
-
+        $unique_cachdanh = array_unique($cd_array);
+        if(count($unique_cachdanh) != count($result)){
+            echo json_encode(['m'=> 'Cách đánh bị trùng','error'=>1]); die;
+        }
 
 
 
