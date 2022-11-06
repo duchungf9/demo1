@@ -291,8 +291,20 @@ class GrammarLesson {
         foreach ($cac_cu_phap as &$_cp) {
             $_cp['cachdanh'] = $this->phantichCachDanh($_cp);
         }
-        cammomdump($cac_cu_phap);
+        // cammomdump($cac_cu_phap);
         // step cuối, dựa vào các cú pháp khác nhau để tách ra data cuối
+        $data = [];
+        foreach($cac_cu_phap as $cp){
+            $array_dai = explode(" ", $cp['dai']);
+            foreach($array_dai as $dai){
+                $data[] = [
+                    'dai' => $dai,
+                    'body' => $cp['cachdanh']
+                ];
+            }
+        }
+
+        cammomdump($data);
 
 
 
