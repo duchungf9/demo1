@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dfabe318-210c-4b5e-a4b6-d66cb5653a0e" name="Default" comment="danh lien">
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index2.php" beforeDir="false" afterPath="$PROJECT_DIR$/index2.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,14 +28,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="318">
-              <caret line="479" column="46" lean-forward="true" selection-end-line="689" />
-              <folding>
-                <element signature="e#8#14#0" expanded="true" />
-                <element signature="e#29#35#0" expanded="true" />
-                <element signature="e#44#50#0" expanded="true" />
-                <element signature="e#68#74#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="203">
+              <caret line="264" column="27" selection-start-line="264" selection-start-column="27" selection-end-line="264" selection-end-column="27" />
             </state>
           </provider>
         </entry>
@@ -66,10 +60,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="1940" />
-    <option name="height" value="1100" />
+    <option name="x" value="45" />
+    <option name="y" value="-15" />
+    <option name="width" value="1750" />
+    <option name="height" value="980" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -92,7 +86,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../scms3-front2" />
     <property name="settings.editor.selected.configurable" value="reference.webide.settings.project.settings.php" />
   </component>
   <component name="RunDashboard">
@@ -123,6 +117,7 @@
       <workItem from="1666778924796" duration="15000" />
       <workItem from="1667116779374" duration="4603000" />
       <workItem from="1667640194177" duration="4137000" />
+      <workItem from="1667795144154" duration="3312000" />
     </task>
     <task id="LOCAL-00001" summary="danh lien">
       <created>1664373458663</created>
@@ -205,7 +200,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19288000" />
+    <option name="totallyTimeSpent" value="22600000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -218,9 +213,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26492536" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2675906" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -230,7 +224,7 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="7" visible="true" weight="0.14046822" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="7" visible="true" weight="0.43701226" />
       <window_info anchor="bottom" id="RNConsole" order="8" weight="0.15461347" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.053511705" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
@@ -254,14 +248,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/index.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="479" column="46" lean-forward="true" selection-end-line="689" />
-          <folding>
-            <element signature="e#8#14#0" expanded="true" />
-            <element signature="e#29#35#0" expanded="true" />
-            <element signature="e#44#50#0" expanded="true" />
-            <element signature="e#68#74#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="203">
+          <caret line="264" column="27" selection-start-line="264" selection-start-column="27" selection-end-line="264" selection-end-column="27" />
         </state>
       </provider>
     </entry>
