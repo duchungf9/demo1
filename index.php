@@ -114,6 +114,22 @@ class N289
         return $result;
     }
 
+    private function getNDai(){
+        $data = $this->dais;
+        $result = [];
+        foreach($data as $item_array){
+            foreach($item_array as $key=>$items){
+                foreach($items as $key => $dai){
+                    if($key==0){
+                        $result[] = $dai;
+                    }
+
+                }
+            }
+        }
+        return $result;
+    }
+
     private function getTenDai($ten_viet_tat){
         $data = $this->dais;
         $result = null;
@@ -217,10 +233,28 @@ class N289
         $cuphap = [];
         foreach ($array_cacDai as $indexDai => $dai) {
             $dai = trim($dai);
-            $cuphap[] = [
-                'dai'  => $dai,
-                'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
-            ];
+            if(in_array($dai,['2d','3d','4d'])){
+                // lấy ra N đài đầu tiên.
+                $number = str_replace("d", "", $dai);
+                $ndai = $this->getNDai();
+
+                for($i=1;$i<=$number;$i++){
+                    if(!isset($ndai[$i])){
+                        echo json_encode(['m'=>'Hôm nay chỉ có ' . ($i-1) . " đài",'error'=>1]);die;
+                    }
+                    $cuphap[] = [
+                        'dai'  => $ndai[$i],
+                        'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
+                    ];
+                }
+            }else{
+                $cuphap[] = [
+                    'dai'  => $dai,
+                    'tail' => trim($this->getTheTailDai($dai, $input, $array_cacDai, $indexDai))
+                ];
+            }
+
+
         }
         foreach ($cuphap as &$_cp) {
             $_cp['cachdanh'] = $this->validateTail($_cp);
@@ -440,9 +474,18 @@ class N289
             }
         }
 
+        $cd_array = [];
+        foreach($result as $item){
+            $query2 = '/((\d+|\d{1,4}k\d{1,4})+ ?)+? ?([a-z]+) ?\d+/';
+            preg_match_all($query2, $item, $__matches);
+            $cachdanh = $__matches[3][0];
+            $cd_array[] = $cachdanh;
+        }
 
-
-
+        $unique_cachdanh = array_unique($cd_array);
+        if(count($unique_cachdanh) != count($result)){
+            echo json_encode(['m'=> 'Cách đánh bị trùng','error'=>1]); die;
+        }
 
 
 
@@ -527,13 +570,15 @@ class N289
 $_old = isset($_GET['s']) ? $_GET['s'] : "";
 $loadModel = new N289();
 //$loadModel->getSoKeo("0000k9999");
-echo "<style>table, th, td {
-  border: 1px solid black;
-}</style>";
-echo "<form method='GET' action='/'>
-            <textarea name='s' cols='100' rows='20'>{$_old}</textarea>
-            <button type='submit'>Test</button>
-    </form>";
+//echo "<style>table, th, td {
+//  border: 1px solid black;
+//}</style>";
+//echo "<form method='GET' action='/'>
+//            <textarea name='s' cols='100' rows='20'>{$_old}</textarea>
+//            <button type='submit'>Test</button>
+//    </form>";
+header('Content-Type: application/json; charset=utf-8');
+
 echo $loadModel->run($_old);
 
 //function checkFnc($input_lines)
@@ -638,7 +683,6 @@ echo $loadModel->run($_old);
 //9900 6969 b1 ok
 //16 61 da15 16 b50 32 duoi 300 ok
 //49 67 27 65 da2 dd30 49 27 b25 765 b5 xc30 583 b3 16 61 b20 da10 ok");
-
 
 
 
