@@ -334,10 +334,11 @@ class GrammarLesson {
                     // lấy số đánh của index gần nhất khác null
                     $max_index = $_data_item['index'];
                     $so_danh_gan_nhat = [];
+                    $index_gan_nhat = -1;
                     for($i = $max_index; $i >= 0; $i--){
                         foreach($data as $__item){
-                            
-                            if($__item['index'] == $i && $__item['sodanh'] != null){
+                            if($__item['index'] == $i && $__item['sodanh'] != null && ($index_gan_nhat < 0 || $index_gan_nhat == $i)){
+                                    $index_gan_nhat = $i;
                                     $so_danh_gan_nhat[] = $__item['sodanh'];
                             }
                         }
@@ -425,10 +426,6 @@ class GrammarLesson {
             ];
         }
         return $result;
-
-        
-        
-        die;
     }
 
     /*
