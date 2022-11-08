@@ -13,6 +13,45 @@ function showError($mes, $opt = []){
     }
     
 }
+function printCombination($arr,
+                          $n, $r)
+{
+    $data = array();
+    combinationUtil($arr, $data, 0,
+                    $n - 1, 0, $r);
+}
+ 
+
+function combinationUtil($arr, $data, $start,
+                         $end, $index, $r)
+                 
+{
+    // Current combination is ready
+    // to be printed, print it
+    if ($index == $r)
+    {
+        for ($j = 0; $j < $r; $j++){
+            return $data[$j];
+        }
+    }
+ 
+    // replace index with all
+    // possible elements. The
+    // condition "end-i+1 >=
+    // r-index" makes sure that
+    // including one element at
+    // index will make a combination
+    // with remaining elements at
+    // remaining positions
+    for ($i = $start;
+         $i <= $end &&
+         $end - $i + 1 >= $r - $index; $i++)
+    {
+        $data[$index] = $arr[$i];
+        combinationUtil($arr, $data, $i + 1,
+                        $end, $index + 1, $r);
+    }
+}
 
 function showSuccess($mes, $opt = []){
     header('Content-Type: application/json; charset=utf-8');
@@ -72,6 +111,7 @@ class GrammarLesson {
 
         curl_close($curl);
         $data =  json_decode($response);
+        // cammomdump($data);
         $this->dataDai = $data->data->tendai;
         $this->dataCachDanh = $data->data->cachchoi;
         $this->dataAllDai = $data->data->alldai;
@@ -132,6 +172,29 @@ class GrammarLesson {
 
     }
 
+    private function layCachChoi($cach_choi_short){
+
+        $data = $this->dataCachDanh;
+        $result = null;
+        foreach($data as $item_array){
+            foreach($item_array as $ten_cach => $items){
+                foreach($items as $item){
+                    foreach($item as $key=>$it){
+                        foreach($it as $_k =>  $i){
+                            if($i === $cach_choi_short){
+                                $result = $key;
+                            }
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        return $result;
+    }
+
     /*
     2d 3d 4d
     */
@@ -179,128 +242,16 @@ class GrammarLesson {
         return implode(", ", $messages);
     }
 
-    // private function    phantichCachDanh($cuphap){
-    //     $tail = $cuphap['body'];
-    //     $dai = $cuphap['dai'];
-    //     $full_cuphap = $dai  . " " . $tail;
-    //     $str_type = implode("|", $this->danhSachAllCachChoi());
-    //     // kiểm tra xem có phải là các cách đánh viết liền sau tên đài hay không?
-    //     $query = '/((\d+ ?|\d{1,4}k\d{1,4}|\d{1,4}khc\d{1,4}|\d{1,4}khc\d{1,4})+ ?)+? ?('.$str_type.')+ ?(\d+)/';
-    //     $query_full = '/'.$dai. ' (.*?) ?('.$str_type.')+ ?(\d+)/'; // query này sẽ lấy các số đánh tiengiang ?(.*?) ?(bay|lo|dat) \d+
-    //     $query_2 = "/(($str_type) ?\d{1,3}[\s\S]?){2,}/";        // kiểm tra phần sau có phải là lặp cú pháp 3+4 (1, 2 giữ nguyên)
-    //     $query_3 = "//"; // kiểm tra lặp 2 + 3 + 4 ()
-    //     preg_match_all($query, $tail, $matches);
-    //     preg_match_all($query_2, $tail, $matches2);
-    //     preg_match_all($query_3, $tail, $matches3);
-    //     preg_match_all($query_full, $full_cuphap, $matches_full);
-    //     cammomdump($matches);
-    //     // cammomdump($tail);
-    //     // cammomdump($matches_full);
-    //     $sodanh_string_full = trim($matches_full[1][0]);
-    //     cammomdump($sodanh_string_full);
-    //     $sodanh_array = explode(" ", $sodanh_string_full);
-    //     $result = [];
-    //     $cd_array = [];
-    //     $data = [];
-    //     if(empty($matches2[0])){
-    //         // trường hợp chỉ có 1 cú pháp, không lặp cú pháp
-    //         $not_matches = preg_split($query, $tail);
-    //         if (!empty($not_matches[0])) {
-    //             showError("Lỗi cú pháp ở đoạn ( không tồn tại cách đánh ){$not_matches[0]}",['hilight'=>$not_matches[0]]);
-    //             die;
-    //         }
-    //         $array_cuphap_cachdanh = $matches[0];
-    //         if (count($array_cuphap_cachdanh) == 0) {
-    //             showError($this->getMessageWhenError($tail, $cuphap));
-    //             die;
-
-    //         }
-
-    //         foreach ($array_cuphap_cachdanh as $index => $cuphap_cachdanh) {
-    //             $result[] = $cuphap_cachdanh;
-    //         }
-            
-    //         foreach($result as $key => $item){
-    //             // $sodanh = trim($matches[1][$key]);
-    //             foreach($sodanh_array as $_index => $_sodanh){
-    //                 $sodanh = $sodanh_array[$_index];
-    //                 $cachdanh = $matches[3][$key];
-    //                 $tiendanh = $matches[4][$key];;
-    //                 $data[] = [
-    //                     'sodanh'=>$sodanh,
-    //                     'cachdanh'=>$cachdanh,
-    //                     'tiendanh'=>$tiendanh
-    //                 ];
-    //             }
-                
-    //         }
-    //     }else{
-    //         // tách cú pháp.
-    //         $matched_string = $matches2[0][0];
-    //         $not_matches = preg_split($query_2, $tail);
-    //         if(!empty($not_matches[1])){
-    //             showError("Lỗi cú pháp ở đoạn ( không tồn tại cách đánh ){$not_matches[1]}",['hilight'=>$not_matches[1]]);
-    //         }
-    //         // $query_get_sodanh = "/(\d{1,}|\d{2,4}k\d{2,4})+ ?$matched_string/";
-    //         // preg_match_all($query_get_sodanh, $tail, $matches_sodanh);
-    //         $sodanh = $sodanh_string_full;
-    //         cammomdump($sodanh);
-            
-    //         $query_tach = "/($str_type) ?\d{1,}/";
-    //         preg_match_all($query_tach, $matches2[0][0], $matches3);
-    //         foreach($matches3[0] as $item){
-    //             $result[] = $sodanh." ".$item;
-    //         }
-    //         if(!isset($sodanh)){
-    //             showError("Không xác định được số đánh");
-    //             die;
-    //         }
-    //         foreach($result as $item){
-    //             $query2 = "/$sodanh_string_full ?([a-z]+) ?(\d+)/";
-    //             preg_match_all($query2, $item, $__matches);
-    //             $cachdanh = $__matches[3][0];
-    //             $tiendanh = $__matches[4][0];
-    //             $cd_array[] = $cachdanh;
-    //             foreach($sodanh_array as $_index => $_sodanh){
-    //                 $sodanh = $sodanh_array[$_index];
-    //                 $data[] = [
-    //                     'sodanh'=>$sodanh,
-    //                     'cachdanh'=>$cachdanh,
-    //                     'tiendanh'=>$tiendanh
-    //                 ];
-    //             }
-    //             // $data[] = [
-    //             //     'sodanh'=>$sodanh,
-    //             //     'cachdanh'=>$cachdanh,
-    //             //     'tiendanh'=>$tiendanh
-    //             // ];
-            
-    //         }
-
-    //         $unique_cachdanh = array_unique($cd_array);
-        
-    //         if(count($unique_cachdanh) != count($result)){
-    //             showError("Cách đánh đang bị trùng");
-    //             die;
-    //         }
-    //     }
-        
-        
-        
-
-
-    //     return $data;
-    // }
 
     private function phantichCachDanh2($cuphap){
         /*
             VT 22 33 bao 44 bay 55 66 dax 77 dc 88
             -> d: 	VT 22 bao 44
-                VT 33 bao 44
-                VT 22 bay 55
-                VT 33 bay 55
-                VT 66 dax 77
-                VT 66 dc  88
+                    VT 33 bao 44
+                    VT 22 bay 55
+                    VT 33 bay 55
+                    VT 66 dax 77
+                    VT 66 dc  88
 
             d: VT
             cd: bao, bay, dax, dc => lấy các chữ cái non digit. Lọc thêm chữ đó có phải dạng số kéo thì bỏ qua. Còn nếu không nằm trong bộ
@@ -320,8 +271,8 @@ class GrammarLesson {
         $data = [];
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
+            $__data = [];
             foreach($_data_phan_tich_sodanh as $_item){
-                // cammomdump($so_danh);
                 $_data_item = [
                     'dai'    => $dai,
                     'sodanh' => $_item['sodanh'],
@@ -345,7 +296,7 @@ class GrammarLesson {
                     }
 
                     if(count($so_danh_gan_nhat) == 0){
-                        showError("Không tìm được số đánh cho cách đánh [$cach_danh]",['highlight'=>$body]);
+                        showError("Không tìm được số đánh cho cách đánh [$_cach_danh]",['highlight'=>$body]);
                         die;
                     }
 
@@ -358,21 +309,32 @@ class GrammarLesson {
                             'index' => $_item['index'],
                         ];
 
-                        $data[] = $__so_danh_gan_nhat_single_data;
+                        $__data[] = $__so_danh_gan_nhat_single_data;
                     }
 
 
                 }else{
-                    $data[] = $_data_item;
+                    $__data[] = $_data_item;
                 }
 
                 
                 
             }
-           
+            $full_string_cachchoi = ($this->layCachChoi($_cach_danh));
+            if($full_string_cachchoi === 'dathang'){
+                $__data = $this->tachDaThang($__data);
+            }
+            if($full_string_cachchoi === 'daxien'){
+                $__data = $this->tachDaXien($__data);
+            }
+            foreach($__data as $d){
+                $data[] = $d;
+            }
+            
         }
 
-        // cammomdump($data);
+        
+        
         return $data;
         // $data = $this->phanTichSoDanhDuaTrenCachDanh($start_index_cach_danh,$ky_tu_non_digit[0], $body);
         
@@ -494,15 +456,53 @@ class GrammarLesson {
 
         đánh 2->4 đài, đánh từ 2 số trở lên : longan hcm  20 30 40 dax 30 -> longan 20 30 dax 30, longan 20 40 dax 30, long an 30 40 dax 30 ( hcm tương tự )
     */
-    private function tachDaXien(){
-
+    private function tachDaXien($data){
+        cammomdump($data);
+        return $data;
     }
 
     /*
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
-    private function tachDaThang(){
+    private function tachDaThang($data){
+            $count_sodanh = count($data);
+            $arr_sodanh = [];
+            if($count_sodanh < 2){
+                showError("cách chơi đá thẳng phải có 2 số trở lên");
+                die;
+            }
+            foreach($data as $dathang_item){
+                $arr_sodanh[] = $dathang_item['sodanh'];
+                if(strlen($dathang_item['sodanh']) != 2){
+                    showError("Số trong cách chơi đá thẳng phải là số có 2 chữ số", ['highlight'=> $dathang_item['sodanh']]);
+                    die;
+                }
+            }
+            
+            $kethopso = [];
+            foreach($arr_sodanh as $k1=>$sd){
+                foreach($arr_sodanh as $k2=>$sd2){
+                    if($k1 !== $k2){
+                        $_sd_data = [$sd, $sd2];
+                        sort($_sd_data);
+                        $kethopso[] = $_sd_data;
+                    }
+                }
+            }
 
+            $result = [];
+            $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
+            foreach($ket_hop_so as $so){
+                $result[] = [
+                    'dai'=>$data[0]['dai'],
+                    'cachdanh'=>$data[0]['cachdanh'],
+                    'sodanh' => $so,
+                    'tien' => $data[0]['tien'],
+                    'index' => $data[0]['index'],
+                ];
+            }
+            
+            return $result;
     }
 
     public function verify(){
