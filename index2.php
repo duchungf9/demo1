@@ -112,7 +112,7 @@ class GrammarLesson {
                 'ver'=> '1.0', 'app_key'=>'MANTEK@150100',
                 'op'=>'mobile',
                 'act'=>'apilotterytest',
-                'type'=>0,
+                'type'=> $_GET['type'] ?? 0,
                 'plus'=>'list_dai'
             ],
         ));
