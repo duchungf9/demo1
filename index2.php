@@ -146,7 +146,7 @@ class GrammarLesson {
         $data = $this->dataAllDai;
         $result = [];
         foreach($data as $item_array){
-            foreach($item_array as $items){
+            foreach($item_array as $items){ 
                 foreach($items as $dai){
                     $result[] = $dai;
                 }
@@ -572,7 +572,7 @@ class GrammarLesson {
             foreach($dai as $_dai){
                 $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
                 if($check_dai_hom_nay == false){
-                    showError("Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
+                    showError("-Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
                     die;
                 }
                 $data_sokeo = $this->phanTichSoKeo($_normalItem, $_dai);
@@ -610,7 +610,7 @@ class GrammarLesson {
             if(!empty($_dai)){
                 $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
                 if($check_dai_hom_nay == false){
-                    showError("Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
+                    showError("--Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
                     die;
                 }
             }
@@ -691,21 +691,27 @@ class GrammarLesson {
 
             $result = [];
             $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
-            $check_dai_hom_nay = $this->checkDaiHomNay($data[0]['dai']);
-            if($check_dai_hom_nay == false){
-                showError("Ngày hôm nay không có đài [$data[0]['dai']]", ['highlight'=> $data[0]['dai']]);
-                die;
+            $array_dai = explode(" ", trim($data[0]['dai']));
+            foreach($array_dai as $__dai){
+                $check_dai_hom_nay = $this->checkDaiHomNay(trim($__dai));
+                if($check_dai_hom_nay == false){
+                    showError("[3]Ngày hôm nay không có đài [{$__dai}]", ['highlight'=> $__dai]);
+                    die;
+                }
+
+                foreach($ket_hop_so as $so){
+                    $result[] = [
+                        'dai' =>$__dai,
+                        'cachdanh'=>$data[0]['cachdanh'],
+                        'sodanh' => $so,
+                        'tien' => $data[0]['tien'],
+                        'index' => $data[0]['index'],
+                    ];
+                }
             }
             
-            foreach($ket_hop_so as $so){
-                $result[] = [
-                    'dai' =>$data[0]['dai'],
-                    'cachdanh'=>$data[0]['cachdanh'],
-                    'sodanh' => $so,
-                    'tien' => $data[0]['tien'],
-                    'index' => $data[0]['index'],
-                ];
-            }
+            
+            
             
             return $result;
     }
