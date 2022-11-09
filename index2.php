@@ -62,17 +62,27 @@ function showSuccess($mes, $opt = []){
     }
 }
 
-function phanTichCuPhap(string $dai, string $input, array $array_cacDai, int $indexDai): string
+function phanTichCuPhap(string $dai, string &$input, array $array_cacDai, int $indexDai): string
 {
-    
     $next = $array_cacDai[$indexDai + 1] ?? "";
+    $case = null;// phân ra 2 trường hợp
     if (!empty($next)) {
-        $query = "/$dai ?(.+) ($next)/";
+        $case = 1;
+        $query = "/($dai ?(.*?)) ($next)/";
     } else {
+        $case = 2;
         $query = "/$dai ?(.+)/"; // đài cuối
     }
     preg_match_all($query, $input, $matches);
-    return $matches[1][0] ?? "";
+    if($case == 1){
+        
+        $input2 = str_replace($matches[1][0],"", $input);
+        $input = $input2;
+        return $matches[2][0] ?? "";
+    }else{
+        return $matches[1][0] ?? "";
+    }
+   
 }
 
 
@@ -101,7 +111,7 @@ class GrammarLesson {
             CURLOPT_POSTFIELDS => [
                 'ver'=> '1.0', 'app_key'=>'MANTEK@150100',
                 'op'=>'mobile',
-                'act'=>'apilottery',
+                'act'=>'apilotterytest',
                 'type'=>0,
                 'plus'=>'list_dai'
             ],
@@ -111,7 +121,6 @@ class GrammarLesson {
 
         curl_close($curl);
         $data =  json_decode($response);
-        // cammomdump($data);
         $this->dataDai = $data->data->tendai;
         $this->dataCachDanh = $data->data->cachchoi;
         $this->dataAllDai = $data->data->alldai;
@@ -242,6 +251,15 @@ class GrammarLesson {
         return implode(", ", $messages);
     }
 
+    private function timCachDanhBiTrung($array, $cuphap)
+    {
+        $els = ( array_unique( array_diff_assoc( $array, array_unique($array))));
+        if(count($els) > 0){
+            showError("Có cách đánh bị trùng", ['hightlight'=> $cuphap['body']]);
+            die;
+        }
+    }
+
 
     private function phantichCachDanh2($cuphap){
         /*
@@ -264,11 +282,14 @@ class GrammarLesson {
         */
         $dai = $cuphap['dai'];
         $body = $cuphap['body'];
-        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{2,4}(k|khc|kht)\d{2,4})/'; // tìm các ký tự không phải là số trong chuỗi.
+        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
         $start_index_cach_danh = 0;
         $data = [];
+
+        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
+        
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
             $__data = [];
@@ -316,16 +337,14 @@ class GrammarLesson {
                 }else{
                     $__data[] = $_data_item;
                 }
-
-                
-                
             }
             $full_string_cachchoi = ($this->layCachChoi($_cach_danh));
             if($full_string_cachchoi === 'dathang'){
                 $__data = $this->tachDaThang($__data);
-            }
-            if($full_string_cachchoi === 'daxien'){
+            }elseif($full_string_cachchoi === 'daxien'){
                 $__data = $this->tachDaXien($__data);
+            }else{
+                $__data = $this->tachBinhThuong($__data);
             }
             foreach($__data as $d){
                 $data[] = $d;
@@ -345,11 +364,9 @@ class GrammarLesson {
     private function kiemTraCachDanhHopLe(&$cach_danh){
         $tat_ca_cachdanh = $this->danhSachAllCachChoi(); // lấy danh sách tất cả các cách đánh
         // kiểm tra xem có phải là số kéo không thì cũng bỏ qua.
-        $query_so_keo = '/(\d{2,4}(k|khc|kht)\d{2,4})/';
-
+        $query_so_keo = '/(\d{1,}(k|khc|kht)\d{1,})/';
         foreach($cach_danh as $index=>$word){
             preg_match_all($query_so_keo, $word, $matches_sokeo);
-            
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
                 showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh]);
                 die;
@@ -365,7 +382,7 @@ class GrammarLesson {
 
     private function phanTichSoDanhDuaTrenCachDanh($cach_danh, &$body_string, $index){
 
-        $query_so_danh = "/((.+) ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
+        $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
         $tiendanh = $matches_so_danh[4][0];
         if(empty($tiendanh)){
@@ -408,23 +425,27 @@ class GrammarLesson {
         // chia các đài ra các mảng củ pháp.
         $cac_cu_phap = [];
         foreach($dai_da_tim_thay as $indexDai => $dai){
-            $dai = trim($dai);
-            if(in_array($dai,['2d','3d','4d'])){
+            if(in_array(trim($dai),['2d','3d','4d'])){
                 // lấy ra N đài đầu tiên.
+                $dai = trim($dai);
                 $number = str_replace("d", "", $dai);
                 $ndai = $this->getNDai();
-
+                $_str_n_dai = [];
                 for($i=1;$i<=$number;$i++){
                     if(!isset($ndai[$i])){
                         showError("Hôm nay chỉ có ". ($i-1) ." đài"); 
                         die;
                     }
-                    $cac_cu_phap[] = [
-                        'dai'  => $ndai[$i],
-                        'body' => trim(phanTichCuPhap($dai, $input, $dai_da_tim_thay, $indexDai))
-                    ];
+                    $_str_n_dai[] = $ndai[$i];
+                
                 }
+                
+                $cac_cu_phap[] = [
+                    'dai'  => implode(" ", $_str_n_dai),
+                    'body' => trim(phanTichCuPhap($dai, $input, $dai_da_tim_thay, $indexDai))
+                ];
             }else{
+
                 $cac_cu_phap[] = [
                     'dai'  => $dai,
                     'body' => trim(phanTichCuPhap($dai, $input, $dai_da_tim_thay, $indexDai))
@@ -444,6 +465,97 @@ class GrammarLesson {
     }
 
     /*
+        Check xem hôm nay có đài này không
+        return boolean.
+    */
+    private function checkDaiHomNay($ten_viet_tat){
+        $ten_viet_tat = trim($ten_viet_tat);
+        $daiHomnay = $this->dataDai;
+        foreach($daiHomnay as $keyDai => $array_dai){
+            foreach($array_dai as $_arr_dai){
+                foreach($_arr_dai as $dai){
+                    if($dai === $ten_viet_tat){
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /*
+        Kiểm tra số đánh có phải là số kéo không.
+    */
+    private function phanTichSoKeo($_normalItem, $_dai){
+        $sodanh = $_normalItem['sodanh'];
+        $query = "/(((\d{1,})(k|khc|kht)(\d{1,})))/";
+        preg_match_all($query, $sodanh, $matches);
+        if(!empty($matches[1][0])){
+            $min = trim($matches[3][0]);
+            $max = trim($matches[5][0]);
+            $str_len_min  = strlen($min);
+            $str_len_max = strlen($max);
+            if((int)$max <= (int)$min){
+                showError("Số Kéo $max không thể nhỏ hơn hoặc bằng số kéo $min", ['highlight'=> $sodanh]);
+                die;
+            }
+            if($str_len_min != $str_len_max){
+                showError("Số kéo $min($str_len_min con) và $max($str_len_max con) không cùng loại:", ['highlight'=> $sodanh]);
+                die;
+            }
+
+            if($str_len_min >= 4){
+                showError("Tối đa được phép kéo hàng trăm", ['highlight'=> $sodanh]);
+                die;
+            }
+
+            $sokeo_type = $str_len_max."con";
+            if($sokeo_type == "2con"){
+               if($min[1] != $max[1]){
+                showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
+                die;
+               }
+            }
+
+            if($sokeo_type == "3con"){
+                if($min[1].$min[2] != $max[1].$max[2]){
+                 showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$min[1]}{$max[2]}", ['highlight'=> $sodanh]);
+                 die;
+                }
+            }
+            $result = [];
+            $increment_num = 0;
+            switch($sokeo_type){
+                case "1con":
+                    $increment_num = 1;
+                    break;
+                case "2con":
+                    $increment_num = 10;
+                    break;
+                case "3con":
+                    $increment_num = 100;
+                    break;        
+            }
+
+            for($i=$min; $i<=$max;$i+=$increment_num){
+                $result[] = [
+                    'dai'     => $_dai,
+                    'cachdanh'=> $_normalItem['cachdanh'],
+                    'sodanh'  => (int)$i,
+                    'tien'    => $_normalItem['tien'],
+                    'index'   => $_normalItem['index'],
+                ];
+            }
+
+            
+            return $result;
+        }
+        return false;
+    }
+
+
+    /*
     Tách số kéo từ cú pháp đã tách sơ bộ ở @TachCuPhap()
     00k10 -> kéo từ 00, 01 -> 10
     khc -> kéo hàng chục: 11k31 -> 11 21 31
@@ -452,19 +564,106 @@ class GrammarLesson {
 
     }
 
+    private function tachBinhThuong($data){
+        // kiểm tra đài.
+        $result = [];
+        foreach($data as $_normalItem){
+            $dai = explode(" ", trim($_normalItem['dai']));
+            foreach($dai as $_dai){
+                $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
+                if($check_dai_hom_nay == false){
+                    showError("Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
+                    die;
+                }
+                $data_sokeo = $this->phanTichSoKeo($_normalItem, $_dai);
+                if($data_sokeo == false){
+
+                    // trường hợp số thường, không phải số kéo.
+                    $result[] = [
+                        'dai'     => $_dai,
+                        'cachdanh'=> $_normalItem['cachdanh'],
+                        'sodanh'  => $_normalItem['sodanh'],
+                        'tien'    => $_normalItem['tien'],
+                        'index'   => $_normalItem['index'],
+                    ];
+                }else{
+                    foreach($data_sokeo as $_sokeo){
+                        $result[] = $_sokeo;
+                    }
+                }
+
+            }
+        }
+        return $result;
+    }
+
     /*
 
         đánh 2->4 đài, đánh từ 2 số trở lên : longan hcm  20 30 40 dax 30 -> longan 20 30 dax 30, longan 20 40 dax 30, long an 30 40 dax 30 ( hcm tương tự )
     */
     private function tachDaXien($data){
-        cammomdump($data);
-        return $data;
+        // kiểm tra xem số đài.
+        $first_data = $data[0];
+        $dai  = explode(" ", trim($first_data['dai']));
+        foreach($dai as $_dai){
+            $_dai = trim($_dai);
+            if(!empty($_dai)){
+                $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
+                if($check_dai_hom_nay == false){
+                    showError("Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
+                    die;
+                }
+            }
+
+        }
+        $so_dai = count($dai);
+        if($so_dai < 2){
+            showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
+            die;
+        }
+        $count_sodanh = count($data);
+        $arr_sodanh = [];
+        if($count_sodanh < 2){
+            showError("cách chơi đá xiên phải có 2 số trở lên");
+            die;
+        }
+        foreach($data as $daxien_item){
+            $arr_sodanh[] = $daxien_item['sodanh'];
+            if(strlen($daxien_item['sodanh']) != 2){
+                showError("Số trong cách chơi đá xiên phải là số có 2 chữ số", ['highlight'=> $daxien_item['sodanh']]);
+                die;
+            }
+        }
+        $kethopso = [];
+        foreach($arr_sodanh as $k1=>$sd){
+            foreach($arr_sodanh as $k2=>$sd2){
+                if($k1 !== $k2){
+                    $_sd_data = [$sd, $sd2];
+                    sort($_sd_data);
+                    $kethopso[] = $_sd_data;
+                }
+            }
+        }
+        $result = [];
+        $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
+        foreach($ket_hop_so as $so){
+            $result[] = [
+                'dai'=>$dai,
+                'cachdanh'=> $first_data['cachdanh'],
+                'sodanh'  => $so,
+                'tien'    => $first_data['tien'],
+                'index'   => $first_data['index'],
+            ];
+        }
+
+        return $result;
     }
 
     /*
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
     private function tachDaThang($data){
+        
             $count_sodanh = count($data);
             $arr_sodanh = [];
             if($count_sodanh < 2){
@@ -492,9 +691,15 @@ class GrammarLesson {
 
             $result = [];
             $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
+            $check_dai_hom_nay = $this->checkDaiHomNay($data[0]['dai']);
+            if($check_dai_hom_nay == false){
+                showError("Ngày hôm nay không có đài [$data[0]['dai']]", ['highlight'=> $data[0]['dai']]);
+                die;
+            }
+            
             foreach($ket_hop_so as $so){
                 $result[] = [
-                    'dai'=>$data[0]['dai'],
+                    'dai' =>$data[0]['dai'],
                     'cachdanh'=>$data[0]['cachdanh'],
                     'sodanh' => $so,
                     'tien' => $data[0]['tien'],
@@ -507,8 +712,10 @@ class GrammarLesson {
 
     public function verify(){
         $input = $_GET['s'];
+        $input = preg_replace('/\s\s+/', ' ', $input); // replace các khoảng trắng liên tục về khoảng trắng duy nhất
         $cuphap_da_tach = $this->TachCuPhap($input);
         showSuccess($cuphap_da_tach);
+        die;
 
     }
 }
