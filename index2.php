@@ -343,7 +343,7 @@ class GrammarLesson {
         */
         $dai = $cuphap['dai'];
         $body = $cuphap['body'];
-        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
+        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
         $start_index_cach_danh = 0;
@@ -460,7 +460,7 @@ class GrammarLesson {
     private function kiemTraCachDanhHopLe(&$cach_danh){
         $tat_ca_cachdanh = $this->danhSachAllCachChoi(); // lấy danh sách tất cả các cách đánh
         // kiểm tra xem có phải là số kéo không thì cũng bỏ qua.
-        $query_so_keo = '/(\d{1,}(k|khc|kht)\d{1,})/';
+        $query_so_keo = '/(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/';
         foreach($cach_danh as $index=>$word){
             preg_match_all($query_so_keo, $word, $matches_sokeo);
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
@@ -584,9 +584,10 @@ class GrammarLesson {
     */
     private function phanTichSoKeo($_normalItem, $_dai){
         $sodanh = $_normalItem['sodanh'];
-        $query = "/(((\d{1,})(k|khc|kht)(\d{1,})))/";
+        $query = "/(((\d{1,})(k|khc|kht|kc|kl|khn)(\d{1,})))/";
         preg_match_all($query, $sodanh, $matches);
         if(!empty($matches[1][0])){
+            $loai_keo = trim($matches[4][0]);
             $min = trim($matches[3][0]);
             $max = trim($matches[5][0]);
             $str_len_min  = strlen($min);
@@ -606,38 +607,73 @@ class GrammarLesson {
             }
 
             $sokeo_type = $str_len_max."con";
-            if($sokeo_type == "2con"){
+            if($loai_keo == 'khc'){
                if($min[1] != $max[1]){
                 showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
                 die;
                }
             }
 
-            if($sokeo_type == "3con"){
+            if($loai_keo == 'kht'){
                 if($min[1].$min[2] != $max[1].$max[2]){
                  showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$min[1]}{$max[2]}", ['highlight'=> $sodanh]);
                  die;
                 }
             }
+
+            if($loai_keo == 'khn'){
+                if($min[1].$min[2].$min[3] != $max[1].$max[2].$max[3]){
+                    showError("Số kéo hàng nghìn không giống nhau {$min[1]}{$min[2]}{$min[3]} và {$min[1]}{$max[2]}{$min[3]}", ['highlight'=> $sodanh]);
+                    die;
+                }
+            }
+
+            if($loai_keo == 'kl'){
+                if($min % 2 == 0 || $max % 2 == 0){
+
+                        showError("Số kéo Lẻ phải là số lẻ.", ['highlight'=> [$min, $max]]);
+                        die;
+
+                }
+            }
+
+            if($loai_keo == 'kc'){
+                if($min % 2 != 0 || $max % 2 != 0){
+
+                    showError("Số kéo chẵn phải là số chẵn.", ['highlight'=> [$min, $max]]);
+                    die;
+
+                }
+            }
+
             $result = [];
             $increment_num = 0;
-            switch($sokeo_type){
-                case "1con":
+            switch($loai_keo){
+                case "k":
                     $increment_num = 1;
                     break;
-                case "2con":
+                case "khc":
                     $increment_num = 10;
                     break;
-                case "3con":
+                case "kht":
                     $increment_num = 100;
-                    break;        
+                    break;
+                case "khn":
+                    $increment_num = 1000;
+                    break;
+                case "kl":
+                    $increment_num = 2;
+                    break;
+                case "kc":
+                    $increment_num = 2;
+                    break;
             }
 
             for($i=$min; $i<=$max;$i+=$increment_num){
                 $result[] = [
                     'dai'     => $_dai,
                     'cachdanh'=> $_normalItem['cachdanh'],
-                    'sodanh'  => (int)$i,
+                    'sodanh'  => str_pad($i, $str_len_max, "0", STR_PAD_LEFT),
                     'tien'    => $_normalItem['tien'],
                     'index'   => $_normalItem['index'],
                     'keydai'=> $this->getTenDai($_dai),
