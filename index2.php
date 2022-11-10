@@ -307,12 +307,19 @@ class GrammarLesson {
 
     private function timCachDanhBiTrung($array, $cuphap)
     {
+        $tmpl = [];
+        foreach($array as &$item){
+            $item = $this->layCachChoi($item);
+        }
+        
         $els = ( array_unique( array_diff_assoc( $array, array_unique($array))));
         if(count($els) > 0){
-            showError("Có cách đánh bị trùng", ['hightlight'=> $cuphap['body']]);
+            showError("Có cách đánh bị trùng", ['hightlight'=> $cuphap['body'], 'duplicate'=> $els]);
             die;
         }
     }
+
+
 
 
     private function phantichCachDanh2($cuphap){
@@ -342,11 +349,12 @@ class GrammarLesson {
         $start_index_cach_danh = 0;
         $data = [];
         $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
-        
+
         if(count($ky_tu_non_digit[0]) <= 0){
             showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap]);
             die;
         }
+
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
 
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
@@ -672,6 +680,10 @@ class GrammarLesson {
                 $data_sokeo = $this->phanTichSoKeo($_normalItem, $_dai);
                 if($data_sokeo == false){
                     $strlen  = strlen($_normalItem['sodanh']);
+                    if($strlen <= 1 || $strlen >= 5){
+                        showError("Số đánh phải là 1 số từ 2-4 chữ số" , ['hightlight'=> $_normalItem['sodanh']]);
+                        die;
+                    }
                     $types = $this->getTypeBySoDanh($strlen."con");
                     if(in_array($_normalItem['cachdanh'], $types) == false){
                         showError("cách đánh $strlen con không thể đánh {$_normalItem['cachdanh']}");
@@ -685,7 +697,6 @@ class GrammarLesson {
                         'tien'    => $_normalItem['tien'],
                         'index'   => $_normalItem['index'],
                         'keydai'=> $this->getTenDai($_dai),
-
                         'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
 
                     ];
