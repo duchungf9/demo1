@@ -289,11 +289,13 @@ class GrammarLesson {
         $data = [];
 
         $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
-        
+
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
+
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
             $__data = [];
             foreach($_data_phan_tich_sodanh as $_item){
+
                 $_data_item = [
                     'dai'    => $dai,
                     'sodanh' => $_item['sodanh'],
@@ -301,6 +303,8 @@ class GrammarLesson {
                     'tien'=> $_item['tien'],
                     'index' => $_item['index'],
                 ];
+
+                
 
                 if($_data_item['sodanh'] == null){
                     // lấy số đánh của index gần nhất khác null
@@ -311,14 +315,23 @@ class GrammarLesson {
                         foreach($data as $__item){
                             if($__item['index'] == $i && $__item['sodanh'] != null && ($index_gan_nhat < 0 || $index_gan_nhat == $i)){
                                     $index_gan_nhat = $i;
-                                    $so_danh_gan_nhat[] = $__item['sodanh'];
+                                    break;
                             }
                         }
                     }
+                    foreach($data as $__item){
+                        if($__item['index'] == $index_gan_nhat){
+                            $so_danh_gan_nhat[] = $__item['sodanh'];
+                        }
+                    }
+
+
 
                     if(count($so_danh_gan_nhat) == 0){
                         showError("Không tìm được số đánh cho cách đánh [$_cach_danh]",['highlight'=>$body]);
                         die;
+                    }else{
+                        $so_danh_gan_nhat = array_unique($so_danh_gan_nhat, SORT_REGULAR);
                     }
 
                     foreach($so_danh_gan_nhat as $__so_danh_gan_nhat_single){
@@ -349,11 +362,10 @@ class GrammarLesson {
             foreach($__data as $d){
                 $data[] = $d;
             }
-            
+
         }
 
-        
-        
+
         return $data;
         // $data = $this->phanTichSoDanhDuaTrenCachDanh($start_index_cach_danh,$ky_tu_non_digit[0], $body);
         
@@ -568,6 +580,7 @@ class GrammarLesson {
         // kiểm tra đài.
         $result = [];
         foreach($data as $_normalItem){
+            // cammomdump($_normalItem);
             $dai = explode(" ", trim($_normalItem['dai']));
             foreach($dai as $_dai){
                 $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
@@ -581,8 +594,8 @@ class GrammarLesson {
                     // trường hợp số thường, không phải số kéo.
                     $result[] = [
                         'dai'     => $_dai,
-                        'cachdanh'=> $_normalItem['cachdanh'],
                         'sodanh'  => $_normalItem['sodanh'],
+                        'cachdanh'=> $_normalItem['cachdanh'],
                         'tien'    => $_normalItem['tien'],
                         'index'   => $_normalItem['index'],
                     ];
@@ -648,7 +661,7 @@ class GrammarLesson {
         $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
         foreach($ket_hop_so as $so){
             $result[] = [
-                'dai'=>$dai,
+                'dai'=>implode(" ",$dai),
                 'cachdanh'=> $first_data['cachdanh'],
                 'sodanh'  => $so,
                 'tien'    => $first_data['tien'],
@@ -663,7 +676,7 @@ class GrammarLesson {
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
     private function tachDaThang($data){
-        
+        cammomdump($data);
             $count_sodanh = count($data);
             $arr_sodanh = [];
             if($count_sodanh < 2){
