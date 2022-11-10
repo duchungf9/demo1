@@ -7,9 +7,9 @@ function cammomdump($data){
 function showError($mes, $opt = []){
     header('Content-Type: application/json; charset=utf-8');
     if(count($opt) == 0){
-        echo json_encode(['error'=>1, 'data'=>$mes]); die;
+        echo json_encode(['error'=>1, 'message'=>$mes]); die;
     }else{
-        echo json_encode(['error'=>1, 'data'=>$mes, 'opt'=>$opt]); die;
+        echo json_encode(['error'=>1, 'message'=>$mes, 'opt'=>$opt]); die;
     }
     
 }
@@ -98,7 +98,7 @@ class GrammarLesson {
 
     private function getApiData(){
         $curl = curl_init();
-
+        
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://ayeshop.com/mobile.php',
             CURLOPT_RETURNTRANSFER => true,
@@ -113,7 +113,8 @@ class GrammarLesson {
                 'op'=>'mobile',
                 'act'=>'apilotterytest',
                 'type'=> $_GET['type'] ?? 0,
-                'plus'=>'list_dai'
+                'plus'=>'list_dai',
+                'date' => $_GET['date'] ?? ""
             ],
         ));
 
@@ -177,8 +178,26 @@ class GrammarLesson {
         return $results;
     }
 
-    private function cachChoiByDai($tenDai){
+    private  function getTypeBySoDanh($sodanh){
+        $data = $this->dataCachDanh;
+        $results = [];
+        foreach($data as $value){
+            foreach($value as $key => $items){
+                if($sodanh == $key){
+                    foreach($items as $_items){
+                        foreach($_items as $__items){
+                            foreach($__items as $item){
+                                $results[] = $item;
+                            }
 
+                        }
+
+                    }
+                }
+
+            }
+        }
+        return $results;
     }
 
     private function layCachChoi($cach_choi_short){
@@ -220,6 +239,41 @@ class GrammarLesson {
                 }
             }
         }
+        return $result;
+    }
+
+    private function getTenDai($ten_viet_tat){
+        $data = $this->dataAllDai;
+        $result = null;
+        if(is_array($ten_viet_tat)){
+            $result = [];
+            foreach($ten_viet_tat as $short){
+                foreach($data as $item_array){
+                    foreach($item_array as $ten_dai => $items){
+                        foreach($items as $dai){
+                            if($dai === $short){
+                                $result[] = $ten_dai;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $result = implode(" ", $result);
+
+        }else{
+            foreach($data as $item_array){
+                foreach($item_array as $ten_dai => $items){
+                    foreach($items as $dai){
+                        if($dai === $ten_viet_tat){
+                            $result = $ten_dai;
+                        }
+                    }
+                }
+            }
+        }
+
+
         return $result;
     }
 
@@ -304,7 +358,6 @@ class GrammarLesson {
                     'index' => $_item['index'],
                 ];
 
-                
 
                 if($_data_item['sodanh'] == null){
                     // lấy số đánh của index gần nhất khác null
@@ -322,6 +375,7 @@ class GrammarLesson {
                     foreach($data as $__item){
                         if($__item['index'] == $index_gan_nhat){
                             $so_danh_gan_nhat[] = $__item['sodanh'];
+
                         }
                     }
 
@@ -335,15 +389,35 @@ class GrammarLesson {
                     }
 
                     foreach($so_danh_gan_nhat as $__so_danh_gan_nhat_single){
-                        $__so_danh_gan_nhat_single_data = [
-                            'dai'    => $dai,
-                            'sodanh' => $__so_danh_gan_nhat_single,
-                            'cachdanh'=>$_item['cachdanh'],
-                            'tien'=> $_item['tien'],
-                            'index' => $_item['index'],
-                        ];
+                        if( !is_array($__so_danh_gan_nhat_single )){
+                            $__so_danh_gan_nhat_single_data = [
+                                'dai'    => $dai,
+                                'sodanh' => $__so_danh_gan_nhat_single,
+                                'cachdanh'=>$_item['cachdanh'],
+                                'tien'=>   $_item['tien'],
+                                'index' => $_item['index'],
+                                'keydai'=> $this->getTenDai($dai),
+                                'keydanh'=>$this->layCachChoi($_item['cachdanh'])
 
-                        $__data[] = $__so_danh_gan_nhat_single_data;
+                            ];
+                            $__data[] = $__so_danh_gan_nhat_single_data;
+                        }else{
+                            foreach($__so_danh_gan_nhat_single as $__single){
+                                $__data[] = [
+                                    'dai'    => $dai,
+                                    'sodanh' => $__single,
+                                    'cachdanh'=>$_item['cachdanh'],
+                                    'tien'=> $_item['tien'],
+                                    'index' => $_item['index'],
+                                    'keydai'=> $this->getTenDai($dai),
+                                    'keydanh'=>$this->layCachChoi($_item['cachdanh'])
+
+                                ];
+                            }
+                        }
+
+
+
                     }
 
 
@@ -396,7 +470,7 @@ class GrammarLesson {
 
         $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
-        $tiendanh = $matches_so_danh[4][0];
+        $tiendanh = $matches_so_danh[4][0] ?? "";
         if(empty($tiendanh)){
             showError("Không xác định được tiền đánh trong cách đánh [$cach_danh]", ['highlight'=>$cach_danh]);
             die;
@@ -429,7 +503,7 @@ class GrammarLesson {
         $queryGetDai = "/((($str_all_dai) ?)+) ?\d+/";
         preg_match_all($queryGetDai, $input, $matches_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
-            showError("Không tìm thấy đài nào phù hợp trong văn bản");
+            showError("Không tìm thấy đài nào phù hợp trong văn bản", ['q'=>$queryGetDai]);
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];       
@@ -557,6 +631,10 @@ class GrammarLesson {
                     'sodanh'  => (int)$i,
                     'tien'    => $_normalItem['tien'],
                     'index'   => $_normalItem['index'],
+                    'keydai'=> $this->getTenDai($_dai),
+
+                    'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
+
                 ];
             }
 
@@ -588,9 +666,16 @@ class GrammarLesson {
                     showError("-Ngày hôm nay không có đài [$_dai]", ['highlight'=> $_dai]);
                     die;
                 }
+
+
                 $data_sokeo = $this->phanTichSoKeo($_normalItem, $_dai);
                 if($data_sokeo == false){
-
+                    $strlen  = strlen($_normalItem['sodanh']);
+                    $types = $this->getTypeBySoDanh($strlen."con");
+                    if(in_array($_normalItem['cachdanh'], $types) == false){
+                        showError("cách đánh $strlen con không thể đánh {$_normalItem['cachdanh']}");
+                        die;
+                    }
                     // trường hợp số thường, không phải số kéo.
                     $result[] = [
                         'dai'     => $_dai,
@@ -598,6 +683,10 @@ class GrammarLesson {
                         'cachdanh'=> $_normalItem['cachdanh'],
                         'tien'    => $_normalItem['tien'],
                         'index'   => $_normalItem['index'],
+                        'keydai'=> $this->getTenDai($_dai),
+
+                        'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
+
                     ];
                 }else{
                     foreach($data_sokeo as $_sokeo){
@@ -666,6 +755,10 @@ class GrammarLesson {
                 'sodanh'  => $so,
                 'tien'    => $first_data['tien'],
                 'index'   => $first_data['index'],
+                'keydai' => $this->getTenDai($dai),
+                'keydanh'=>$this->layCachChoi($first_data['cachdanh'])
+
+
             ];
         }
 
@@ -676,7 +769,6 @@ class GrammarLesson {
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
     private function tachDaThang($data){
-        cammomdump($data);
             $count_sodanh = count($data);
             $arr_sodanh = [];
             if($count_sodanh < 2){
@@ -719,6 +811,8 @@ class GrammarLesson {
                         'sodanh' => $so,
                         'tien' => $data[0]['tien'],
                         'index' => $data[0]['index'],
+                        'keydanh'=>$this->layCachChoi($data[0]['cachdanh'])
+
                     ];
                 }
             }
