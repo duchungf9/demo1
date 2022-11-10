@@ -341,15 +341,17 @@ class GrammarLesson {
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
         $start_index_cach_danh = 0;
         $data = [];
-
         $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
-
+        
+        if(count($ky_tu_non_digit[0]) <= 0){
+            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap]);
+            die;
+        }
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
 
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
             $__data = [];
             foreach($_data_phan_tich_sodanh as $_item){
-
                 $_data_item = [
                     'dai'    => $dai,
                     'sodanh' => $_item['sodanh'],
@@ -467,7 +469,6 @@ class GrammarLesson {
     }
 
     private function phanTichSoDanhDuaTrenCachDanh($cach_danh, &$body_string, $index){
-
         $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
         $tiendanh = $matches_so_danh[4][0] ?? "";
@@ -500,7 +501,7 @@ class GrammarLesson {
         // step1: (đài{1,})(số-đánh{1,}|số-kéo)(cách-đánh)(tiền-đánh{1})
         $all_dai = $this->danhSachAllDai();
         $str_all_dai = implode("|", $all_dai);
-        $queryGetDai = "/((($str_all_dai) ?)+) ?\d+/";
+        $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)?/";
         preg_match_all($queryGetDai, $input, $matches_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
             showError("Không tìm thấy đài nào phù hợp trong văn bản", ['q'=>$queryGetDai]);
