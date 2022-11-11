@@ -13,6 +13,14 @@ function showError($mes, $opt = []){
     }
     
 }
+
+function str_replace_first($search, $replace, $subject)
+{
+    $search = '/'.preg_quote($search, '/').'/';
+    return preg_replace($search, $replace, $subject, 1);
+}
+
+
 function printCombination($arr,
                           $n, $r)
 {
@@ -504,7 +512,7 @@ class GrammarLesson {
             die;
         }
         $so_danh = $matches_so_danh[2][0];
-        $body_string = str_replace($matches_so_danh[0][0],"", $body_string); // bỏ phần đã tìm được ra khỏi body
+        $body_string = str_replace_first($matches_so_danh[0][0],"", $body_string); // bỏ phần đã tìm được ra khỏi body
         $so_danh = trim($so_danh);
         $so_danh_array = explode(" ", $so_danh);
         $result = [];
