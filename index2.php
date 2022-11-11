@@ -323,6 +323,7 @@ class GrammarLesson {
 
 
     private function phantichCachDanh2($cuphap){
+//        cammomdump($cuphap);
         /*
             VT 22 33 bao 44 bay 55 66 dax 77 dc 88
             -> d: 	VT 22 bao 44
@@ -348,7 +349,7 @@ class GrammarLesson {
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
         $start_index_cach_danh = 0;
         $data = [];
-        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
+//        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
 
         if(count($ky_tu_non_digit[0]) <= 0){
             showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap]);
@@ -356,7 +357,6 @@ class GrammarLesson {
         }
 
         foreach($ky_tu_non_digit[0] as $_index => $_cach_danh){
-
             $_data_phan_tich_sodanh = $this->phanTichSoDanhDuaTrenCachDanh($_cach_danh, $body, $_index);
             $__data = [];
             foreach($_data_phan_tich_sodanh as $_item){
@@ -449,6 +449,20 @@ class GrammarLesson {
 
         }
 
+        $tmpl = $data;
+        $_compare_tmpl = [];
+
+        foreach($tmpl as &$_tmpl){
+            unset($_tmpl['index']);
+            if(in_array($_tmpl, $_compare_tmpl)){
+                showError("Có cách đánh bị trùng ! " , ['hightlight'=> $_tmpl['cachdanh']]);
+                die;
+            }
+            $_compare_tmpl[] = $_tmpl;
+        }
+
+
+
 
         return $data;
         // $data = $this->phanTichSoDanhDuaTrenCachDanh($start_index_cach_danh,$ky_tu_non_digit[0], $body);
@@ -476,8 +490,13 @@ class GrammarLesson {
 
     }
 
-    private function phanTichSoDanhDuaTrenCachDanh($cach_danh, &$body_string, $index){
-        $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
+    private function phanTichSoDanhDuaTrenCachDanh($cach_danh, &$body_string, $index)
+    {
+        $start_array = (explode($cach_danh, $body_string));
+        $start_string = $start_array[0];
+
+//        $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
+        $query_so_danh = "/(($start_string)($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
         $tiendanh = $matches_so_danh[4][0] ?? "";
         if(empty($tiendanh)){
@@ -526,7 +545,7 @@ class GrammarLesson {
                 $number = str_replace("d", "", $dai);
                 $ndai = $this->getNDai();
                 $_str_n_dai = [];
-                for($i=1;$i<=$number;$i++){
+                for($i=0;$i<$number;$i++){
                     if(!isset($ndai[$i])){
                         showError("Hôm nay chỉ có ". ($i-1) ." đài"); 
                         die;
@@ -800,7 +819,7 @@ class GrammarLesson {
             $result[] = [
                 'dai'=>implode(" ",$dai),
                 'cachdanh'=> $first_data['cachdanh'],
-                'sodanh'  => $so,
+                'sodanh'  => is_array($so) ? implode(" ", $so) : $so,
                 'tien'    => $first_data['tien'],
                 'index'   => $first_data['index'],
                 'keydai' => $this->getTenDai($dai),
@@ -856,7 +875,7 @@ class GrammarLesson {
                     $result[] = [
                         'dai' =>$__dai,
                         'cachdanh'=>$data[0]['cachdanh'],
-                        'sodanh' => $so,
+                        'sodanh' => is_array($so) ? implode(" ", $so) : $so,
                         'tien' => $data[0]['tien'],
                         'index' => $data[0]['index'],
                         'keydanh'=>$this->layCachChoi($data[0]['cachdanh'])
