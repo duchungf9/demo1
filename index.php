@@ -262,15 +262,6 @@ class N289
 
         $this->getSoDanh($cuphap);
         $cuphap = array_sort($cuphap, 'dai', SORT_DESC);
-        $table = "<table>";
-        $table .= "<thead><tr><td>Đài</td><td>Số đánh</td><td>Cách đánh</td><td>Tiền đánh</td><td>note</td></tr></thead>";
-        $table .= "<tbody>";
-        foreach ($cuphap as $cp) {
-            $_str_cp = is_array($cp['cachdanh']) ? 'đúng' : $cp['cachdanh'];
-            $table .= "<tr><td>&nbsp;{$cp['dai']}&nbsp;</td><td>&nbsp;{$cp['sodanh']}&nbsp;</td><td>{$cp['type']}</td><td>{$cp['tiendanh']}</td><td>{$_str_cp}</td></tr>";
-        }
-        $table .= "</tbody>";
-        $table .= "</table>";
         if(is_array($cuphap)){
             $_cloneCuphap = $cuphap;
             foreach($_cloneCuphap as &$_ccp){
@@ -286,10 +277,8 @@ class N289
             $result[] = ['error'=> 1, 'mes' => $this->errors];
         }
 
-//        echo "Api";
-//        echo "<br/>";
+
         echo json_encode($result);
-//        return $table;
 
     }
 

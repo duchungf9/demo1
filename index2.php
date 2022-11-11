@@ -331,7 +331,8 @@ class GrammarLesson {
 
 
     private function phantichCachDanh2($cuphap){
-//        cammomdump($cuphap);
+
+    //    cammomdump($cuphap);
         /*
             VT 22 33 bao 44 bay 55 66 dax 77 dc 88
             -> d: 	VT 22 bao 44
@@ -462,8 +463,9 @@ class GrammarLesson {
 
         foreach($tmpl as &$_tmpl){
             unset($_tmpl['index']);
+            unset($_tmpl['tien']);
             if(in_array($_tmpl, $_compare_tmpl)){
-                showError("Có cách đánh bị trùng ! " , ['hightlight'=> $_tmpl['cachdanh']]);
+                showError("Có cách đánh bị trùng ! " , ['hightlight'=> $_tmpl]);
                 die;
             }
             $_compare_tmpl[] = $_tmpl;
@@ -628,8 +630,8 @@ class GrammarLesson {
                 die;
             }
 
-            if($str_len_min >= 4){
-                showError("Tối đa được phép kéo hàng trăm", ['highlight'=> $sodanh]);
+            if($str_len_min >= 5){
+                showError("Tối đa được phép kéo hàng nghìn", ['highlight'=> $sodanh]);
                 die;
             }
 
@@ -650,7 +652,7 @@ class GrammarLesson {
 
             if($loai_keo == 'khn'){
                 if($min[1].$min[2].$min[3] != $max[1].$max[2].$max[3]){
-                    showError("Số kéo hàng nghìn không giống nhau {$min[1]}{$min[2]}{$min[3]} và {$min[1]}{$max[2]}{$min[3]}", ['highlight'=> $sodanh]);
+                    showError("Số kéo hàng nghìn không giống nhau {$min[1]}{$min[2]}{$min[3]} và {$max[1]}{$max[2]}{$max[3]}", ['highlight'=> $sodanh]);
                     die;
                 }
             }
@@ -658,8 +660,8 @@ class GrammarLesson {
             if($loai_keo == 'kl'){
                 if($min % 2 == 0 || $max % 2 == 0){
 
-                        showError("Số kéo Lẻ phải là số lẻ.", ['highlight'=> [$min, $max]]);
-                        die;
+                        // showError("Số kéo Lẻ phải là số lẻ.", ['highlight'=> [$min, $max]]);
+                        // die;
 
                 }
             }
@@ -667,8 +669,8 @@ class GrammarLesson {
             if($loai_keo == 'kc'){
                 if($min % 2 != 0 || $max % 2 != 0){
 
-                    showError("Số kéo chẵn phải là số chẵn.", ['highlight'=> [$min, $max]]);
-                    die;
+                    // showError("Số kéo chẵn phải là số chẵn.", ['highlight'=> [$min, $max]]);
+                    // die;
 
                 }
             }
@@ -689,25 +691,36 @@ class GrammarLesson {
                     $increment_num = 1000;
                     break;
                 case "kl":
-                    $increment_num = 2;
+                    $increment_num = 1;
                     break;
                 case "kc":
-                    $increment_num = 2;
+                    $increment_num = 1;
                     break;
             }
 
             for($i=$min; $i<=$max;$i+=$increment_num){
-                $result[] = [
-                    'dai'     => $_dai,
-                    'cachdanh'=> $_normalItem['cachdanh'],
-                    'sodanh'  => str_pad($i, $str_len_max, "0", STR_PAD_LEFT),
-                    'tien'    => $_normalItem['tien'],
-                    'index'   => $_normalItem['index'],
-                    'keydai'=> $this->getTenDai($_dai),
-
-                    'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
-
-                ];
+                if($loai_keo == 'kl'){
+                    if($i % 2 == 0){
+                        $i ++;
+                    }
+                }
+                if($loai_keo == 'kc'){
+                    if($i % 2 != 0){
+                        $i ++;
+                    }
+                }
+                if($i>=$min && $i<=$max){
+                    $result[] = [
+                        'dai'     => $_dai,
+                        'cachdanh'=> $_normalItem['cachdanh'],
+                        'sodanh'  => str_pad($i, $str_len_max, "0", STR_PAD_LEFT),
+                        'tien'    => $_normalItem['tien'],
+                        'index'   => $_normalItem['index'],
+                        'keydai'=> $this->getTenDai($_dai),
+                        'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
+                    ];
+                }
+                
             }
 
             
@@ -827,7 +840,7 @@ class GrammarLesson {
             $result[] = [
                 'dai'=>implode(" ",$dai),
                 'cachdanh'=> $first_data['cachdanh'],
-                'sodanh'  => is_array($so) ? implode(" ", $so) : $so,
+                'sodanh'  => $so,
                 'tien'    => $first_data['tien'],
                 'index'   => $first_data['index'],
                 'keydai' => $this->getTenDai($dai),
@@ -844,10 +857,11 @@ class GrammarLesson {
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
     private function tachDaThang($data){
+            
             $count_sodanh = count($data);
             $arr_sodanh = [];
             if($count_sodanh < 2){
-                showError("cách chơi đá thẳng phải có 2 số trở lên");
+                showError("cách chơi đá thẳng phải có 2 số trở lên", ['highlight'=>$data]);
                 die;
             }
             foreach($data as $dathang_item){
@@ -883,7 +897,7 @@ class GrammarLesson {
                     $result[] = [
                         'dai' =>$__dai,
                         'cachdanh'=>$data[0]['cachdanh'],
-                        'sodanh' => is_array($so) ? implode(" ", $so) : $so,
+                        'sodanh' => $so,
                         'tien' => $data[0]['tien'],
                         'index' => $data[0]['index'],
                         'keydanh'=>$this->layCachChoi($data[0]['cachdanh'])
@@ -898,10 +912,19 @@ class GrammarLesson {
             return $result;
     }
 
+    private function soDanhArrayToString(&$cuphap_da_tach){
+        foreach($cuphap_da_tach as &$cuphapNho){
+            foreach($cuphapNho as &$item){
+                $item['sodanh'] = is_array($item['sodanh']) ? implode(" ", $item['sodanh']) : $item['sodanh'];
+            }
+        }
+    }
+
     public function verify(){
         $input = $_GET['s'];
         $input = preg_replace('/\s\s+/', ' ', $input); // replace các khoảng trắng liên tục về khoảng trắng duy nhất
         $cuphap_da_tach = $this->TachCuPhap($input);
+        $this->soDanhArrayToString($cuphap_da_tach);
         showSuccess($cuphap_da_tach);
         die;
 
