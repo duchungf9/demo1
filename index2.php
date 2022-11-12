@@ -620,6 +620,29 @@ class GrammarLesson {
             $loai_keo = trim($matches[4][0]);
             $min = trim($matches[3][0]);
             $max = trim($matches[5][0]);
+            $padnum = 2;
+            switch($loai_keo){
+                case "k":
+                    $padnum = 2;
+                    break;
+                case "khc":
+                    $padnum = 3;
+                    break;
+                case "kht":
+                    $padnum = 4;
+                    break;
+                case "khn":
+                    $padnum = 5;
+                    break;
+                case "kl":
+                    $padnum = 2;
+                    break;
+                case "kc":
+                    $padnum = 2;
+                    break;
+            }
+            $min = str_pad($min,$padnum, "0", STR_PAD_LEFT);
+            $max = str_pad($max,$padnum, "0", STR_PAD_LEFT);
             $str_len_min  = strlen($min);
             $str_len_max = strlen($max);
             if((int)$max <= (int)$min){
