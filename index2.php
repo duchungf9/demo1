@@ -465,6 +465,7 @@ class GrammarLesson {
             unset($_tmpl['index']);
             unset($_tmpl['tien']);
             if(in_array($_tmpl, $_compare_tmpl)){
+                $this->timCachDanhBiTrung($_tmpl, $cuphap);
                 showError("Có cách đánh bị trùng ! " , ['hightlight'=> $_tmpl]);
                 die;
             }
@@ -557,7 +558,7 @@ class GrammarLesson {
                 $_str_n_dai = [];
                 for($i=0;$i<$number;$i++){
                     if(!isset($ndai[$i])){
-                        showError("Hôm nay chỉ có ". ($i-1) ." đài"); 
+                        showError("Hôm nay chỉ có ". (count($this->getNDai())) ." đài" , ['d'=> $this->getNDai()]);
                         die;
                     }
                     $_str_n_dai[] = $ndai[$i];
@@ -637,13 +638,21 @@ class GrammarLesson {
 
             $sokeo_type = $str_len_max."con";
             if($loai_keo == 'khc'){
+                if($str_len_min < 2){
+                    showError("Số kéo hàng chục phải từ 2 số trở lên", ['highlight'=> "{$min} và {$max}"]);
+                    die;
+                }
                if($min[1] != $max[1]){
-                showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
-                die;
+                    showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
+                    die;
                }
             }
 
             if($loai_keo == 'kht'){
+                if($str_len_min < 3){
+                    showError("Số kéo hàng chục phải từ 3 số trở lên", ['highlight'=> "{$min} và {$max}"]);
+                    die;
+                }
                 if($min[1].$min[2] != $max[1].$max[2]){
                  showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$min[1]}{$max[2]}", ['highlight'=> $sodanh]);
                  die;
@@ -651,6 +660,10 @@ class GrammarLesson {
             }
 
             if($loai_keo == 'khn'){
+                if($str_len_min < 4){
+                    showError("Số kéo hàng nghìn phải từ 4 số trở lên", ['highlight'=> "{$min} và {$max}"]);
+                    die;
+                }
                 if($min[1].$min[2].$min[3] != $max[1].$max[2].$max[3]){
                     showError("Số kéo hàng nghìn không giống nhau {$min[1]}{$min[2]}{$min[3]} và {$max[1]}{$max[2]}{$max[3]}", ['highlight'=> $sodanh]);
                     die;
