@@ -359,7 +359,6 @@ class GrammarLesson {
         $start_index_cach_danh = 0;
         $data = [];
 //        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
-
         if(count($ky_tu_non_digit[0]) <= 0){
             showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap]);
             die;
@@ -540,7 +539,12 @@ class GrammarLesson {
         $all_dai = $this->danhSachAllDai();
         $str_all_dai = implode("|", $all_dai);
         $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)?/";
+        if(isset($_GET['type']) && $_GET['type'] == 1){
+            //(((?<!\d)(kh) ?)+) ??(\d+)?
+            $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)?/";
+        }
         preg_match_all($queryGetDai, $input, $matches_dai);
+//        cammomdump($all_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
             showError("Không tìm thấy đài nào phù hợp trong văn bản", ['q'=>$queryGetDai]);
             die;
