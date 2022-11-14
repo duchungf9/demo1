@@ -360,7 +360,7 @@ class GrammarLesson {
         $data = [];
 //        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
         if(count($ky_tu_non_digit[0]) <= 0){
-            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap]);
+            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap['dai'] ." ". $cuphap['body']]);
             die;
         }
 
@@ -901,7 +901,7 @@ class GrammarLesson {
             $count_sodanh = count($data);
             $arr_sodanh = [];
             if($count_sodanh < 2){
-                showError("cách chơi đá thẳng phải có 2 số trở lên", ['highlight'=>$data]);
+                showError("cách chơi đá thẳng phải có 2 số trở lên", ['highlight'=>$data[0]['sodanh']]);
                 die;
             }
             foreach($data as $dathang_item){
