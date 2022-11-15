@@ -322,7 +322,7 @@ class GrammarLesson {
         
         $els = ( array_unique( array_diff_assoc( $array, array_unique($array))));
         if(count($els) > 0){
-            showError("Có cách đánh bị trùng", ['hightlight'=> $cuphap['body'], 'duplicate'=> $els]);
+            showError("Có cách đánh bị trùng", ['highlight'=> $cuphap['body'], 'duplicate'=> $els]);
             die;
         }
     }
@@ -465,7 +465,7 @@ class GrammarLesson {
             unset($_tmpl['tien']);
             if(in_array($_tmpl, $_compare_tmpl)){
                 $this->timCachDanhBiTrung($_tmpl, $cuphap);
-                showError("Có cách đánh bị trùng ! " , ['hightlight'=> $_tmpl]);
+                showError("Có cách đánh bị trùng ! " , ['highlight'=> $_tmpl]);
                 die;
             }
             $_compare_tmpl[] = $_tmpl;
@@ -797,7 +797,7 @@ class GrammarLesson {
                 if($data_sokeo == false){
                     $strlen  = strlen($_normalItem['sodanh']);
                     if($strlen <= 1 || $strlen >= 5){
-                        showError("Số đánh phải là 1 số từ 2-4 chữ số" , ['hightlight'=> $_normalItem['sodanh']]);
+                        showError("Số đánh phải là 1 số từ 2-4 chữ số" , ['highlight'=> $_normalItem['sodanh']]);
                         die;
                     }
                     $types = $this->getTypeBySoDanh($strlen."con");
