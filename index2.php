@@ -149,11 +149,13 @@ class GrammarLesson {
                 }
             }
         }
-        $result[] = '2d';
-        $result[] = '3d';
-        $result[] = '4d';
+
         if($this->inputtype == BAC){
             $result[] = 'mienbac';
+        }else{
+            $result[] = '2d';
+            $result[] = '3d';
+            $result[] = '4d';
         }
         return $result;
     }
@@ -168,11 +170,13 @@ class GrammarLesson {
                 }
             }
         }
-        $result[] = '2d';
-        $result[] = '3d';
-        $result[] = '4d';
+
         if($this->inputtype == BAC){
             $result[] = 'mienbac';
+        }else{
+            $result[] = '2d';
+            $result[] = '3d';
+            $result[] = '4d';
         }
         return $result;
     }
