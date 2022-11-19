@@ -844,6 +844,48 @@ class GrammarLesson {
         return $result;
     }
 
+    private function ketHopSoDao($items, &$results, $perms = array()){
+        if (empty($items)) {
+            $results[] = implode("", $perms);
+//            print join(' ', $perms) . "\n";
+        }  else {
+            for ($i = count($items) - 1; $i >= 0; --$i) {
+                $newitems = $items;
+                $newperms = $perms;
+                list($foo) = array_splice($newitems, $i, 1);
+                array_unshift($newperms, $foo);
+                $this->ketHopSoDao($newitems, $results, $newperms);
+            }
+        }
+
+        return $results;
+    }
+
+    private function tachSodao(&$data){
+        $array_data = ['daudao','duoidao','dauduoidao','baylodao,baolodao'];
+        foreach($data as &$cp){
+            foreach ($cp as $item){
+                $keydanh = $item['keydanh'];
+                if(in_array($keydanh, $array_data)){
+                    // là type đảo thì đảo.
+                    $sodanh_array = str_split($item['sodanh']);
+                    $results = [];
+                    $this->ketHopSoDao($sodanh_array, $results);
+                    foreach($results as $_item){
+                        if($_item != $item['sodanh']){
+                            $clone_item = $item;
+                            $clone_item['sodanh'] = $_item;
+                            $cp[] = $clone_item;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return $data;
+    }
+
     /*
 
         đánh 2->4 đài, đánh từ 2 số trở lên : longan hcm  20 30 40 dax 30 -> longan 20 30 dax 30, longan 20 40 dax 30, long an 30 40 dax 30 ( hcm tương tự )
@@ -988,6 +1030,7 @@ class GrammarLesson {
         }
         $cuphap_da_tach = $this->TachCuPhap($input);
         $this->soDanhArrayToString($cuphap_da_tach);
+        $this->tachSodao($cuphap_da_tach);
         showSuccess($cuphap_da_tach);
         die;
 
