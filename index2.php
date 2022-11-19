@@ -1,4 +1,7 @@
-<?php 
+<?php
+define("BAC", 2);
+define("TRUNG", 1);
+define("NAM", 0);
 
 function cammomdump($data){
     highlight_string("<?php\n\$data =\n" . var_export($data, true) . ";\n?>");
@@ -99,6 +102,7 @@ class GrammarLesson {
     public $dataDai;
     public $dataCachDanh;
     public $dataAllDai;
+    public $inputtype; // đài bắc/ trung/ nam
     public function __construct()
     {
         $this->getApiData();
@@ -148,6 +152,9 @@ class GrammarLesson {
         $result[] = '2d';
         $result[] = '3d';
         $result[] = '4d';
+        if($this->inputtype == BAC){
+            $result[] = 'mienbac';
+        }
         return $result;
     }
 
@@ -164,6 +171,9 @@ class GrammarLesson {
         $result[] = '2d';
         $result[] = '3d';
         $result[] = '4d';
+        if($this->inputtype == BAC){
+            $result[] = 'mienbac';
+        }
         return $result;
     }
 
@@ -598,6 +608,9 @@ class GrammarLesson {
         return boolean.
     */
     private function checkDaiHomNay($ten_viet_tat){
+        if($this->inputtype == BAC){
+            return true;// bỏ qua check đài miền bắc
+        }
         $ten_viet_tat = trim($ten_viet_tat);
         $daiHomnay = $this->dataDai;
         foreach($daiHomnay as $keyDai => $array_dai){
@@ -848,8 +861,10 @@ class GrammarLesson {
         }
         $so_dai = count($dai);
         if($so_dai < 2){
-            showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
-            die;
+            if($this->inputtype != BAC){
+                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
+                die;
+            }
         }
         $count_sodanh = count($data);
         $arr_sodanh = [];
@@ -963,6 +978,10 @@ class GrammarLesson {
     public function verify(){
         $input = $_GET['s'];
         $input = preg_replace('/\s\s+/', ' ', $input); // replace các khoảng trắng liên tục về khoảng trắng duy nhất
+        $this->inputtype = $_GET['type'] ?? null;
+        if($this->inputtype != null && $this->inputtype == BAC){
+            $input = "mienbac ".$input;
+        }
         $cuphap_da_tach = $this->TachCuPhap($input);
         $this->soDanhArrayToString($cuphap_da_tach);
         showSuccess($cuphap_da_tach);
