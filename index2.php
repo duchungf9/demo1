@@ -103,8 +103,12 @@ class GrammarLesson {
     public $dataCachDanh;
     public $dataAllDai;
     public $inputtype; // đài bắc/ trung/ nam
+    public $haveN = false;
     public function __construct()
     {
+        if(isset($_GET['haveN']) && $_GET['haveN'] == 1){
+            $this->haveN = true;
+        }
         $this->getApiData();
     }
 
@@ -367,7 +371,13 @@ class GrammarLesson {
         */
         $dai = $cuphap['dai'];
         $body = $cuphap['body'];
-        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
+        if($this->haveN == true){ // Có n
+            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
+        }else{
+            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
+
+        }
+
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
         $start_index_cach_danh = 0;
@@ -499,8 +509,16 @@ class GrammarLesson {
         $tat_ca_cachdanh = $this->danhSachAllCachChoi(); // lấy danh sách tất cả các cách đánh
         // kiểm tra xem có phải là số kéo không thì cũng bỏ qua.
         $query_so_keo = '/(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/';
+        $query_so_danh_n = '/\d{1,}n/';
         foreach($cach_danh as $index=>$word){
             preg_match_all($query_so_keo, $word, $matches_sokeo);
+            preg_match_all($query_so_danh_n, $word, $matches_so_co_n);
+            if(!empty($matches_so_co_n[0][0])){
+                $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
+                unset($cach_danh[$index]);
+                continue;
+
+            }
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
                 showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh]);
                 die;
