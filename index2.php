@@ -86,7 +86,6 @@ function phanTichCuPhap(string $dai, string &$input, array $array_cacDai, int $i
     }
     preg_match_all($query, $input, $matches);
     if($case == 1){
-        
         $input2 = str_replace($matches[1][0],"", $input);
         $input = $input2;
         return $matches[2][0] ?? "";
@@ -384,7 +383,7 @@ class GrammarLesson {
         $data = [];
 //        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
         if(count($ky_tu_non_digit[0]) <= 0){
-            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap['dai'] ." ". $cuphap['body']]);
+            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap['dai'] ." ". $cuphap['body'] , 's'=>$ky_tu_non_digit]);
             die;
         }
 
@@ -514,11 +513,15 @@ class GrammarLesson {
             preg_match_all($query_so_keo, $word, $matches_sokeo);
             preg_match_all($query_so_danh_n, $word, $matches_so_co_n);
             if(!empty($matches_so_co_n[0][0])){
-                $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
-                unset($cach_danh[$index]);
-                continue;
-
+                // bỏ N
+                if($this->haveN){
+                    $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
+                    unset($cach_danh[$index]);
+                    continue;
+                }
+                
             }
+
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
                 showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh]);
                 die;
@@ -573,8 +576,9 @@ class GrammarLesson {
         $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)?/";
         if(isset($_GET['type']) && $_GET['type'] == 1){
             //(((?<!\d)(kh) ?)+) ??(\d+)?
-            $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)?/";
+            $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
         }
+        cammomdump($queryGetDai);
         preg_match_all($queryGetDai, $input, $matches_dai);
 //        cammomdump($all_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
@@ -600,11 +604,11 @@ class GrammarLesson {
                     $_str_n_dai[] = $ndai[$i];
                 
                 }
-                
                 $cac_cu_phap[] = [
                     'dai'  => implode(" ", $_str_n_dai),
                     'body' => trim(phanTichCuPhap($dai, $input, $dai_da_tim_thay, $indexDai))
                 ];
+
             }else{
 
                 $cac_cu_phap[] = [
@@ -880,7 +884,7 @@ class GrammarLesson {
     }
 
     private function tachSodao(&$data){
-        $array_data = ['daudao','duoidao','dauduoidao','baylodao,baolodao'];
+        $array_data = ['daudao','duoidao','dauduoidao','baylodao','baolodao'];
         foreach($data as &$cp){
             foreach ($cp as $item){
                 $keydanh = $item['keydanh'];
@@ -905,7 +909,6 @@ class GrammarLesson {
     }
 
     /*
-
         đánh 2->4 đài, đánh từ 2 số trở lên : longan hcm  20 30 40 dax 30 -> longan 20 30 dax 30, longan 20 40 dax 30, long an 30 40 dax 30 ( hcm tương tự )
     */
     private function tachDaXien($data){
