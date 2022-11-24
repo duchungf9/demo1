@@ -371,11 +371,18 @@ class GrammarLesson {
         $dai = $cuphap['dai'];
         $body = $cuphap['body'];
         if($this->haveN == true){ // Có n
+            // trước hết kiểm tra xem có số đánh+N không.
+            $parternn = '/\d{1,}n$/';
+            preg_match_all($parternn, $body, $soDanhWithN);
+            if(!isset($soDanhWithN[0][0]) || empty($soDanhWithN[0][0])){
+                showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> $cuphap]); die;
+            }
             $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
         }else{
             $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
 
         }
+        // $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
 
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
@@ -514,12 +521,14 @@ class GrammarLesson {
             preg_match_all($query_so_danh_n, $word, $matches_so_co_n);
             if(!empty($matches_so_co_n[0][0])){
                 // bỏ N
-                if($this->haveN){
-                    $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
-                    unset($cach_danh[$index]);
-                    continue;
-                }
+                $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
+                unset($cach_danh[$index]);
+                continue;
                 
+            }else{
+                if($this->haveN && !in_array($word, $tat_ca_cachdanh)){
+                    showError("Không có N trong số đánh", ['highlight'=> $word]);
+                }
             }
 
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
@@ -578,7 +587,7 @@ class GrammarLesson {
             //(((?<!\d)(kh) ?)+) ??(\d+)?
             $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
         }
-        cammomdump($queryGetDai);
+        // cammomdump($queryGetDai);
         preg_match_all($queryGetDai, $input, $matches_dai);
 //        cammomdump($all_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
