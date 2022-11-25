@@ -748,8 +748,8 @@ class GrammarLesson {
                     die;
                 }
                 if($min[1].$min[2] != $max[1].$max[2]){
-                 showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$min[1]}{$max[2]}", ['highlight'=> $sodanh]);
-                 die;
+                     showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$max[1]}{$max[2]}", ['highlight'=> $sodanh]);
+                     die;
                 }
             }
 
