@@ -375,7 +375,8 @@ class GrammarLesson {
             $parternn = '/\d{1,}n$/';
             preg_match_all($parternn, $body, $soDanhWithN);
             if(!isset($soDanhWithN[0][0]) || empty($soDanhWithN[0][0])){
-                showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> $cuphap]); die;
+                showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> $cuphap]);
+                die;
             }
 //            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
         }else{
@@ -522,6 +523,7 @@ class GrammarLesson {
             }else{
                 if($this->haveN && !in_array($word, $tat_ca_cachdanh)){
                     showError("Không có N trong số đánh", ['highlight'=> $word]);
+                    die;
                 }
             }
 
@@ -547,6 +549,18 @@ class GrammarLesson {
         $query_so_danh = "/(($start_string)($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
         $tiendanh = $matches_so_danh[4][0] ?? "";
+        if($this->haveN){
+            $parten_validate_tiendanh = '/'.$tiendanh.'n/';
+            preg_match_all($parten_validate_tiendanh, $body_string, $matches_validate);
+            if(empty($matches_validate[0][0])){
+                showError("Tiền đánh sai cấu trúc số+n",['highlight'=>$tiendanh]);
+                die;
+            }
+
+            $body_string  = preg_replace(["/($tiendanh)(n)/"], "$1", $body_string);
+
+        }
+
         if(empty($tiendanh)){
             showError("Không xác định được tiền đánh trong cách đánh [$cach_danh]", ['highlight'=>$cach_danh]);
             die;
@@ -836,7 +850,6 @@ class GrammarLesson {
         // kiểm tra đài.
         $result = [];
         foreach($data as $_normalItem){
-            // cammomdump($_normalItem);
             $dai = explode(" ", trim($_normalItem['dai']));
             foreach($dai as $_dai){
                 $check_dai_hom_nay = $this->checkDaiHomNay($_dai);
@@ -1068,7 +1081,7 @@ class GrammarLesson {
         $this->soDanhArrayToString($cuphap_da_tach);
         $this->tachSodao($cuphap_da_tach);
         foreach($cuphap_da_tach as &$cuphap){
-            $cuphap = array_unique($cuphap, SORT_REGULAR);
+            array_unique($cuphap, SORT_REGULAR);
         }
 
         showSuccess($cuphap_da_tach);
