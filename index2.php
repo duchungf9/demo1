@@ -382,7 +382,7 @@ class GrammarLesson {
             $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
 
         }
-        // $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
+         $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
 
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
@@ -428,7 +428,6 @@ class GrammarLesson {
                     }
 
 
-
                     if(count($so_danh_gan_nhat) == 0){
                         showError("Không tìm được số đánh cho cách đánh [$_cach_danh]",['highlight'=>$body]);
                         die;
@@ -463,12 +462,7 @@ class GrammarLesson {
                                 ];
                             }
                         }
-
-
-
                     }
-
-
                 }else{
                     $__data[] = $_data_item;
                 }
