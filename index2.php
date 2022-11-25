@@ -377,9 +377,9 @@ class GrammarLesson {
             if(!isset($soDanhWithN[0][0]) || empty($soDanhWithN[0][0])){
                 showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> $cuphap]); die;
             }
-            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
+//            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
         }else{
-            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
+//            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
 
         }
          $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
@@ -390,7 +390,7 @@ class GrammarLesson {
         $data = [];
 //        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
         if(count($ky_tu_non_digit[0]) <= 0){
-            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=>$cuphap['dai'] ." ". $cuphap['body'] , 's'=>$ky_tu_non_digit]);
+            showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=> ($cuphap['origin_dai'] ?? $cuphap['dai']) ." ". $cuphap['body']]);
             die;
         }
 
@@ -576,12 +576,12 @@ class GrammarLesson {
         // step1: (đài{1,})(số-đánh{1,}|số-kéo)(cách-đánh)(tiền-đánh{1})
         $all_dai = $this->danhSachAllDai();
         $str_all_dai = implode("|", $all_dai);
-        $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)?/";
+        $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)/";
         if(isset($_GET['type']) && $_GET['type'] == 1){
             //(((?<!\d)(kh) ?)+) ??(\d+)?
             $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
         }
-        // cammomdump($queryGetDai);
+//         cammomdump($queryGetDai);
         preg_match_all($queryGetDai, $input, $matches_dai);
 //        cammomdump($all_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
@@ -608,6 +608,7 @@ class GrammarLesson {
                 
                 }
                 $cac_cu_phap[] = [
+                    'origin_dai'=>$dai,
                     'dai'  => implode(" ", $_str_n_dai),
                     'body' => trim(phanTichCuPhap($dai, $input, $dai_da_tim_thay, $indexDai))
                 ];
@@ -659,6 +660,7 @@ class GrammarLesson {
         Kiểm tra số đánh có phải là số kéo không.
     */
     private function phanTichSoKeo($_normalItem, $_dai){
+
         $sodanh = $_normalItem['sodanh'];
         $query = "/(((\d{1,})(k|khc|kht|kc|kl|khn)(\d{1,})))/";
         preg_match_all($query, $sodanh, $matches);
@@ -667,6 +669,7 @@ class GrammarLesson {
             $min = trim($matches[3][0]);
             $max = trim($matches[5][0]);
             $padnum = 2;
+
             switch($loai_keo){
                 case "k":
                     $padnum = 2;
@@ -691,6 +694,14 @@ class GrammarLesson {
             $max = str_pad($max,$padnum, "0", STR_PAD_LEFT);
             $str_len_min  = strlen($min);
             $str_len_max = strlen($max);
+            $cachdanh = $_normalItem['cachdanh'];
+            $array_data = ['daudao','duoidao','dauduoidao','baylodao','baolodao'];
+            if(in_array($this->layCachChoi($cachdanh), $array_data)){
+                if($str_len_min < 3){
+                    showError("Số Kéo $min -> $max không thể ít hơn 3 chữ số", ['highlight'=> $sodanh]);
+                    die;
+                }
+            }
             if((int)$max <= (int)$min){
                 showError("Số Kéo $max không thể nhỏ hơn hoặc bằng số kéo $min", ['highlight'=> $sodanh]);
                 die;
@@ -896,6 +907,7 @@ class GrammarLesson {
                     $sodanh_array = str_split($item['sodanh']);
                     $results = [];
                     $this->ketHopSoDao($sodanh_array, $results);
+                    $results = array_unique($results, SORT_REGULAR);
                     foreach($results as $_item){
                         if($_item != $item['sodanh']){
                             $clone_item = $item;
@@ -1055,6 +1067,10 @@ class GrammarLesson {
         $cuphap_da_tach = $this->TachCuPhap($input);
         $this->soDanhArrayToString($cuphap_da_tach);
         $this->tachSodao($cuphap_da_tach);
+        foreach($cuphap_da_tach as &$cuphap){
+            $cuphap = array_unique($cuphap, SORT_REGULAR);
+        }
+
         showSuccess($cuphap_da_tach);
         die;
 
