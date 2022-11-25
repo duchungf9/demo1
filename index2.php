@@ -689,13 +689,13 @@ class GrammarLesson {
                     $padnum = 2;
                     break;
                 case "khc":
-                    $padnum = 3;
+                    $padnum = 2;
                     break;
                 case "kht":
-                    $padnum = 4;
+                    $padnum = 3;
                     break;
                 case "khn":
-                    $padnum = 5;
+                    $padnum = 4;
                     break;
                 case "kl":
                     $padnum = 2;
