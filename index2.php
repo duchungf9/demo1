@@ -734,8 +734,8 @@ class GrammarLesson {
                     showError("Số kéo hàng chục phải từ 2 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
                 }
-                if($min[1] != $max[1]){
-                    showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
+                if($min[strlen($min) - 1] != $max[strlen($max) - 1]){
+                    showError("Số kéo hàng chục không giống nhau {$min[strlen($min) - 1]} và {$max[strlen($max) - 1]}", ['highlight'=> $sodanh,'min'=>$min,'max'=>$max]);
                     die;
                 }
             }
@@ -745,8 +745,8 @@ class GrammarLesson {
                     showError("Số kéo hàng chục phải từ 3 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
                 }
-                if($min[1].$min[2] != $max[1].$max[2]){
-                    showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$max[1]}{$max[2]}", ['highlight'=> $sodanh]);
+                if($min[strlen($min) - 1].$min[strlen($min) - 2] != $max[strlen($max) - 1].$max[strlen($max) - 2]){
+                    showError("Số kéo hàng trăm không giống nhau {$min[strlen($min) - 1]}{$min[strlen($min) - 2]} và {$max[strlen($max) - 1]}{$max[strlen($max) - 2]}", ['highlight'=> $sodanh]);
                     die;
                 }
             }
@@ -756,8 +756,8 @@ class GrammarLesson {
                     showError("Số kéo hàng nghìn phải từ 4 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
                 }
-                if($min[1].$min[2].$min[3] != $max[1].$max[2].$max[3]){
-                    showError("Số kéo hàng nghìn không giống nhau {$min[1]}{$min[2]}{$min[3]} và {$max[1]}{$max[2]}{$max[3]}", ['highlight'=> $sodanh]);
+                if($min[strlen($min) - 1].$min[strlen($min) - 2].$min[strlen($min) - 3] != $max[strlen($max) - 1].$max[strlen($max) - 2].$max[strlen($max) - 3]){
+                    showError("Số kéo hàng nghìn không giống nhau", ['highlight'=> $sodanh]);
                     die;
                 }
             }
