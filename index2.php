@@ -14,7 +14,7 @@ function showError($mes, $opt = []){
     }else{
         echo json_encode(['error'=>1, 'message'=>$mes, 'opt'=>$opt]); die;
     }
-    
+
 }
 
 function str_replace_first($search, $replace, $subject)
@@ -31,11 +31,11 @@ function printCombination($arr,
     combinationUtil($arr, $data, 0,
                     $n - 1, 0, $r);
 }
- 
+
 
 function combinationUtil($arr, $data, $start,
                          $end, $index, $r)
-                 
+
 {
     // Current combination is ready
     // to be printed, print it
@@ -45,7 +45,7 @@ function combinationUtil($arr, $data, $start,
             return $data[$j];
         }
     }
- 
+
     // replace index with all
     // possible elements. The
     // condition "end-i+1 >=
@@ -92,7 +92,7 @@ function phanTichCuPhap(string $dai, string &$input, array $array_cacDai, int $i
     }else{
         return $matches[1][0] ?? "";
     }
-   
+
 }
 
 
@@ -113,7 +113,7 @@ class GrammarLesson {
 
     private function getApiData(){
         $curl = curl_init();
-        
+
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://ayeshop.com/mobile.php',
             CURLOPT_RETURNTRANSFER => true,
@@ -167,7 +167,7 @@ class GrammarLesson {
         $data = $this->dataAllDai;
         $result = [];
         foreach($data as $item_array){
-            foreach($item_array as $items){ 
+            foreach($item_array as $items){
                 foreach($items as $dai){
                     $result[] = $dai;
                 }
@@ -336,7 +336,7 @@ class GrammarLesson {
         foreach($array as &$item){
             $item = $this->layCachChoi($item);
         }
-        
+
         $els = ( array_unique( array_diff_assoc( $array, array_unique($array))));
         if(count($els) > 0){
             showError("Có cách đánh bị trùng", ['highlight'=> $cuphap['body'], 'duplicate'=> $els]);
@@ -349,7 +349,7 @@ class GrammarLesson {
 
     private function phantichCachDanh2($cuphap){
 
-    //    cammomdump($cuphap);
+        //    cammomdump($cuphap);
         /*
             VT 22 33 bao 44 bay 55 66 dax 77 dc 88
             -> d: 	VT 22 bao 44
@@ -375,7 +375,7 @@ class GrammarLesson {
             $parternn = '/\d{1,}n$/';
             preg_match_all($parternn, $body, $soDanhWithN);
             if(!isset($soDanhWithN[0][0]) || empty($soDanhWithN[0][0])){
-                showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> $cuphap]);
+                showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> ($cuphap['origin_dai'] ?? $cuphap['dai']) . "". $cuphap['body']]);
                 die;
             }
 //            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
@@ -383,7 +383,7 @@ class GrammarLesson {
 //            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
 
         }
-         $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
+        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
 
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
@@ -416,8 +416,8 @@ class GrammarLesson {
                     for($i = $max_index; $i >= 0; $i--){
                         foreach($data as $__item){
                             if($__item['index'] == $i && $__item['sodanh'] != null && ($index_gan_nhat < 0 || $index_gan_nhat == $i)){
-                                    $index_gan_nhat = $i;
-                                    break;
+                                $index_gan_nhat = $i;
+                                break;
                             }
                         }
                     }
@@ -501,9 +501,9 @@ class GrammarLesson {
 
         return $data;
         // $data = $this->phanTichSoDanhDuaTrenCachDanh($start_index_cach_danh,$ky_tu_non_digit[0], $body);
-        
 
-        
+
+
     }
 
     private function kiemTraCachDanhHopLe(&$cach_danh){
@@ -519,7 +519,7 @@ class GrammarLesson {
                 $word  = preg_replace(["/(\d{1,})(n)/"], "$1", $word);
                 unset($cach_danh[$index]);
                 continue;
-                
+
             }else{
                 if($this->haveN && !in_array($word, $tat_ca_cachdanh)){
                     showError("Không có N trong số đánh", ['highlight'=> $word]);
@@ -556,10 +556,8 @@ class GrammarLesson {
                 showError("Tiền đánh sai cấu trúc số+n",['highlight'=>$tiendanh]);
                 die;
             }
-
-            $body_string  = preg_replace(["/($tiendanh)(n)/"], "$1", $body_string);
-
         }
+        $body_string  = preg_replace(["/($tiendanh)(n)/"], "$1", $body_string);
 
         if(empty($tiendanh)){
             showError("Không xác định được tiền đánh trong cách đánh [$cach_danh]", ['highlight'=>$cach_danh]);
@@ -602,7 +600,7 @@ class GrammarLesson {
             showError("Không tìm thấy đài nào phù hợp trong văn bản", ['q'=>$queryGetDai]);
             die;
         }
-        $dai_da_tim_thay = $matches_dai[1];       
+        $dai_da_tim_thay = $matches_dai[1];
         // cammomdump($matches_dai[1]);
         // chia các đài ra các mảng củ pháp.
         $cac_cu_phap = [];
@@ -619,7 +617,7 @@ class GrammarLesson {
                         die;
                     }
                     $_str_n_dai[] = $ndai[$i];
-                
+
                 }
                 $cac_cu_phap[] = [
                     'origin_dai'=>$dai,
@@ -736,10 +734,10 @@ class GrammarLesson {
                     showError("Số kéo hàng chục phải từ 2 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
                 }
-               if($min[1] != $max[1]){
+                if($min[1] != $max[1]){
                     showError("Số kéo hàng chục không giống nhau {$min[1]} và {$max[1]}", ['highlight'=> $sodanh]);
                     die;
-               }
+                }
             }
 
             if($loai_keo == 'kht'){
@@ -748,8 +746,8 @@ class GrammarLesson {
                     die;
                 }
                 if($min[1].$min[2] != $max[1].$max[2]){
-                     showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$max[1]}{$max[2]}", ['highlight'=> $sodanh]);
-                     die;
+                    showError("Số kéo hàng trăm không giống nhau {$min[1]}{$min[2]} và {$max[1]}{$max[2]}", ['highlight'=> $sodanh]);
+                    die;
                 }
             }
 
@@ -767,8 +765,8 @@ class GrammarLesson {
             if($loai_keo == 'kl'){
                 if($min % 2 == 0 || $max % 2 == 0){
 
-                        // showError("Số kéo Lẻ phải là số lẻ.", ['highlight'=> [$min, $max]]);
-                        // die;
+                    // showError("Số kéo Lẻ phải là số lẻ.", ['highlight'=> [$min, $max]]);
+                    // die;
 
                 }
             }
@@ -827,10 +825,10 @@ class GrammarLesson {
                         'keydanh'=>$this->layCachChoi($_normalItem['cachdanh'])
                     ];
                 }
-                
+
             }
 
-            
+
             return $result;
         }
         return false;
@@ -1007,59 +1005,59 @@ class GrammarLesson {
         phải đánh 2 con số trở lên, 2 con số tương ứng với 1 lệnh, check lại tổ hợp,chỉ dc đánh số có 2 chữ số
     */
     private function tachDaThang($data){
-            
-            $count_sodanh = count($data);
-            $arr_sodanh = [];
-            if($count_sodanh < 2){
-                showError("cách chơi đá thẳng phải có 2 số trở lên", ['highlight'=>$data[0]['sodanh']]);
+
+        $count_sodanh = count($data);
+        $arr_sodanh = [];
+        if($count_sodanh < 2){
+            showError("cách chơi đá thẳng phải có 2 số trở lên", ['highlight'=>$data[0]['sodanh']]);
+            die;
+        }
+        foreach($data as $dathang_item){
+            $arr_sodanh[] = $dathang_item['sodanh'];
+            if(strlen($dathang_item['sodanh']) != 2){
+                showError("Số trong cách chơi đá thẳng phải là số có 2 chữ số", ['highlight'=> $dathang_item['sodanh']]);
                 die;
             }
-            foreach($data as $dathang_item){
-                $arr_sodanh[] = $dathang_item['sodanh'];
-                if(strlen($dathang_item['sodanh']) != 2){
-                    showError("Số trong cách chơi đá thẳng phải là số có 2 chữ số", ['highlight'=> $dathang_item['sodanh']]);
-                    die;
+        }
+
+        $kethopso = [];
+        foreach($arr_sodanh as $k1=>$sd){
+            foreach($arr_sodanh as $k2=>$sd2){
+                if($k1 !== $k2){
+                    $_sd_data = [$sd, $sd2];
+                    sort($_sd_data);
+                    $kethopso[] = $_sd_data;
                 }
             }
-            
-            $kethopso = [];
-            foreach($arr_sodanh as $k1=>$sd){
-                foreach($arr_sodanh as $k2=>$sd2){
-                    if($k1 !== $k2){
-                        $_sd_data = [$sd, $sd2];
-                        sort($_sd_data);
-                        $kethopso[] = $_sd_data;
-                    }
-                }
+        }
+
+        $result = [];
+        $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
+        $array_dai = explode(" ", trim($data[0]['dai']));
+        foreach($array_dai as $__dai){
+            $check_dai_hom_nay = $this->checkDaiHomNay(trim($__dai));
+            if($check_dai_hom_nay == false){
+                showError("[3]Ngày hôm nay không có đài [{$__dai}]", ['highlight'=> $__dai]);
+                die;
             }
 
-            $result = [];
-            $ket_hop_so = array_unique($kethopso, SORT_REGULAR);
-            $array_dai = explode(" ", trim($data[0]['dai']));
-            foreach($array_dai as $__dai){
-                $check_dai_hom_nay = $this->checkDaiHomNay(trim($__dai));
-                if($check_dai_hom_nay == false){
-                    showError("[3]Ngày hôm nay không có đài [{$__dai}]", ['highlight'=> $__dai]);
-                    die;
-                }
+            foreach($ket_hop_so as $so){
+                $result[] = [
+                    'dai' =>$__dai,
+                    'cachdanh'=>$data[0]['cachdanh'],
+                    'sodanh' => $so,
+                    'tien' => $data[0]['tien'],
+                    'index' => $data[0]['index'],
+                    'keydanh'=>$this->layCachChoi($data[0]['cachdanh'])
 
-                foreach($ket_hop_so as $so){
-                    $result[] = [
-                        'dai' =>$__dai,
-                        'cachdanh'=>$data[0]['cachdanh'],
-                        'sodanh' => $so,
-                        'tien' => $data[0]['tien'],
-                        'index' => $data[0]['index'],
-                        'keydanh'=>$this->layCachChoi($data[0]['cachdanh'])
-
-                    ];
-                }
+                ];
             }
-            
-            
-            
-            
-            return $result;
+        }
+
+
+
+
+        return $result;
     }
 
     private function soDanhArrayToString(&$cuphap_da_tach){
