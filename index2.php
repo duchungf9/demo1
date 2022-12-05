@@ -542,8 +542,8 @@ class GrammarLesson {
                     $pattern_errors .= ".*?" .$cach_danh[$index+1];
                     $pattern_errors .= ")/";
                     preg_match($pattern_errors, $this->input, $___e_m);
-                    cammomdump($pattern_errors);
-                    cammomdump($___e_m);
+//                    cammomdump($pattern_errors);
+//                    cammomdump($___e_m);
                     showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
                     die;
                 }
