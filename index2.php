@@ -550,7 +550,13 @@ class GrammarLesson {
             }
 
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
-                showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh,'mmm'=>$mmm]);
+                $pattern_errors = "/.*?(";
+                $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
+                $pattern_errors .= $cach_danh[$index];
+                $pattern_errors .= ".*?" .$cach_danh[$index+1];
+                $pattern_errors .= ")/";
+                preg_match($pattern_errors, $this->input, $___e_m);
+                showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
                 die;
             }
 
