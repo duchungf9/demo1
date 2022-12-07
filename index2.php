@@ -3,9 +3,12 @@ define("BAC", 2);
 define("TRUNG", 1);
 define("NAM", 0);
 
+define('OPTIONAL_DAI', ['2d','3d','4d','2dai','3dai','4dai','haidai','badai','bondai']);
+
 function cammomdump($data){
     highlight_string("<?php\n\$data =\n" . var_export($data, true) . ";\n?>");
 }
+
 
 function showError($mes, $opt = []){
     header('Content-Type: application/json; charset=utf-8');
@@ -85,6 +88,7 @@ function phanTichCuPhap(string $dai, string &$input, array $array_cacDai, int $i
         $query = "/$dai ?(.+)/"; // đài cuối
     }
     preg_match_all($query, $input, $matches);
+
     if($case == 1){
         $input2 = str_replace($matches[1][0],"", $input);
         $input = $input2;
@@ -103,6 +107,7 @@ class GrammarLesson {
     public $dataAllDai;
     public $inputtype; // đài bắc/ trung/ nam
     public $haveN = false;
+    public $input;
     public function __construct()
     {
         if(isset($_GET['haveN']) && $_GET['haveN'] == 1){
@@ -137,6 +142,7 @@ class GrammarLesson {
 
         curl_close($curl);
         $data =  json_decode($response);
+//        cammomdump($data);
         $this->dataDai = $data->data->tendai;
         $this->dataCachDanh = $data->data->cachchoi;
         $this->dataAllDai = $data->data->alldai;
@@ -156,9 +162,12 @@ class GrammarLesson {
         if($this->inputtype == BAC){
             $result[] = 'mienbac';
         }else{
-            $result[] = '2d';
-            $result[] = '3d';
-            $result[] = '4d';
+            foreach(OPTIONAL_DAI as $dai){
+                $result[] = $dai;
+            }
+//            $result[] = '2d';
+//            $result[] = '3d';
+//            $result[] = '4d';
         }
         return $result;
     }
@@ -177,9 +186,12 @@ class GrammarLesson {
         if($this->inputtype == BAC){
             $result[] = 'mienbac';
         }else{
-            $result[] = '2d';
-            $result[] = '3d';
-            $result[] = '4d';
+            foreach(OPTIONAL_DAI as $dai){
+                $result[] = $dai;
+            }
+//            $result[] = '2d';
+//            $result[] = '3d';
+//            $result[] = '4d';
         }
         return $result;
     }
@@ -378,19 +390,12 @@ class GrammarLesson {
                 showError("Không tìm thấy cú pháp tiền+n", ['highlight'=> ($cuphap['origin_dai'] ?? $cuphap['dai']) . "". $cuphap['body']]);
                 die;
             }
-//            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)/'; // tìm các ký tự không phải là số trong chuỗi.
-        }else{
-//            $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/'; // tìm các ký tự không phải là số trong chuỗi.
-
         }
-        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)|\d{1,}\.\d{1,1}n|\d{1,}\.\d{1,1}/'; // tìm các ký tự không phải là số trong chuỗi.
+        $query_ky_tu_non_digit = '/([^\d ]{1,}|\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}|\d{1,}n)|\d{1,}\.\d{1,}n|\d{1,}\.\d{1,}/'; // tìm các ký tự không phải là số trong chuỗi.
 
         preg_match_all($query_ky_tu_non_digit, $body, $ky_tu_non_digit);
-//        cammomdump($ky_tu_non_digit[0]);
         $this->kiemTraCachDanhHopLe($ky_tu_non_digit[0]); // bắt lỗi cách đánh không hợp lệ.
-        $start_index_cach_danh = 0;
         $data = [];
-//        $this->timCachDanhBiTrung($ky_tu_non_digit[0], $cuphap);
         if(count($ky_tu_non_digit[0]) <= 0){
             showError("Không tìm thấy cách đánh trong văn bản", ['highlight'=> ($cuphap['origin_dai'] ?? $cuphap['dai']) ." ". $cuphap['body']]);
             die;
@@ -512,7 +517,7 @@ class GrammarLesson {
         // kiểm tra xem có phải là số kéo không thì cũng bỏ qua.
         $query_so_keo = '/(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,})/';
         $query_so_danh_n = '/\d{1,}n/';
-        $partern_tien_thap_phan = "/\d{1,}\.\d{1,1}/";
+        $partern_tien_thap_phan = "/\d{1,}\.\d{1,}/";
 
         foreach($cach_danh as $index=>$word){
             preg_match_all($query_so_keo, $word, $matches_sokeo);
@@ -530,14 +535,25 @@ class GrammarLesson {
 
             }else{
                 if($this->haveN && !in_array($word, $tat_ca_cachdanh)){
-                    showError("Không có N trong tiền đánh", ['highlight'=> $word,'a'=>$tat_ca_cachdanh]);
+                    $pattern_errors = "/.*?(";
+                    $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
+                    $pattern_errors .= $cach_danh[$index];
+                    $pattern_errors .= ".*?" .$cach_danh[$index+1];
+                    $pattern_errors .= ")/";
+                    preg_match($pattern_errors, $this->input, $___e_m);
+                    showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
                     die;
                 }
             }
 
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
-
-                showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh,'mmm'=>$mmm]);
+                $pattern_errors = "/.*?(";
+                $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
+                $pattern_errors .= $cach_danh[$index];
+                $pattern_errors .= ".*?" .$cach_danh[$index+1];
+                $pattern_errors .= ")/";
+                preg_match($pattern_errors, $this->input, $___e_m);
+                showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
                 die;
             }
 
@@ -555,7 +571,7 @@ class GrammarLesson {
         $start_string = $start_array[0];
 
 //        $query_so_danh = "/((.+)? ?($cach_danh)) ?(\d+){1,1}/"; // lấy các số đứng trước $cach_danh
-        $query_so_danh = "/(($start_string)($cach_danh)) ?(\d{1,}\.\d{1,1}|(\d+){1,1})/"; // lấy các số đứng trước $cach_danh
+        $query_so_danh = "/(($start_string)($cach_danh)) ?(\d{1,}\.\d{1,}|(\d+){1,1})/"; // lấy các số đứng trước $cach_danh
         preg_match_all($query_so_danh, $body_string, $matches_so_danh);
 //        cammomdump($matches_so_danh);
         $tiendanh = $matches_so_danh[4][0] ?? "";
@@ -567,11 +583,20 @@ class GrammarLesson {
                 die;
             }
         }
-        $body_string  = preg_replace(["/($tiendanh)(n)/"], "$1", $body_string);
+        $body_string  = preg_replace(["/($tiendanh)(n)/"], "$1", $body_string, 1);
 
         if(empty($tiendanh)){
             showError("Không xác định được tiền đánh trong cách đánh [$cach_danh]", ['highlight'=>$cach_danh]);
             die;
+        }
+        $explode = explode(".", $tiendanh);
+        if(count($explode) > 1){
+            $explode = explode(".", $tiendanh);
+            if(strlen($explode[1]) >= 2){
+                showError("Tiền đánh float chưa đúng", ['highlight'=>$tiendanh]);
+                die;
+            }
+
         }
         $so_danh = $matches_so_danh[2][0];
         $body_string = str_replace_first($matches_so_danh[0][0],"", $body_string); // bỏ phần đã tìm được ra khỏi body
@@ -592,9 +617,9 @@ class GrammarLesson {
     }
 
     private function kiemtraDauDuoi(&$input){
-        $parrtern = '/d(\d{1,})/'; // kiểm tra cú pháp d+số
+        $parrtern = '/d(\d{1,}\.\d{1,}|\d{1,})/'; // kiểm tra cú pháp d+số
         if($this->haveN){
-            $parrtern = '/d(\d{1,})n/'; // kiểm tra cú pháp d+số
+            $parrtern = '/d(\d{1,}\.\d{1,}|\d{1,})n/'; // kiểm tra cú pháp d+số
         }
         preg_match_all($parrtern, $input, $matches);
         if(!empty($matches[0][0])){
@@ -602,25 +627,33 @@ class GrammarLesson {
             foreach($firstMatch_group as $key=>$match_item){
                 if(!empty($matches[1][$key])){
                     $number1 = $matches[1][$key];
-                    if(strlen($number1) != 2){
-                        showError("d phải kèm 1 số 2 chữ số", ['highlight'=> $matches[0][$key]]);
-                        die;
-                    }
+//                    if(strlen($number1) != 2){
+//                        showError("d phải kèm 1 số 2 chữ số", ['highlight'=> $matches[0][$key]]);
+//                        die;
+//                    }
 
-                    $parten2 = "/".$matches[0][$key]." ?(d\d{1,})/";
+                    $parten2 = "/".$matches[0][$key]."n? ?(d\d{1,}\.\d{1,}|d\d{1,})n?/";
                     if($this->haveN){
-                        $parten2 = "/".$matches[0][$key]." ?(d\d{1,})n/";
+                        $parten2 = "/".$matches[0][$key]." ?(d\d{1,}\.\d{1,}n|d\d{1,}n)/";
                     }
                     preg_match_all($parten2, $input, $matches2);
-//                    cammomdump($matches2);
                     if(isset($matches2[0][0])){
                         $matches2_item = $matches2[0][0];
                         $matches2_item2 = $matches2[1][0];
+                        $new_partern = "/(.*?)(".$matches2_item.")/";
+                        preg_match($new_partern, $input, $__matches);
+                        $_need_replace = $__matches[2];
+
                         if(!empty($matches2_item)){
-                            // đúng là đầu đuôi thì converrt -> dau duoi
-                            $input = str_replace($matches[0][$key], str_replace("d","dau", $matches[0][$key]), $input);
-                            $input = str_replace($matches2_item2, str_replace("d","duoi", $matches2_item2), $input);
-//                            cammomdump($input);
+                            $_clone_need_replace = $_need_replace;
+                            $_need_replace = str_replace_first($matches[0][$key], str_replace("d","dau", $matches[0][$key]), $_need_replace);
+                            $_need_replace = str_replace_first($matches2_item2, str_replace("d","duoi", $matches2_item2), $_need_replace);
+//                            $input = str_replace_first($matches[0][$key], str_replace("d","dau", $matches[0][$key]), $input);
+//                            $input = str_replace_first($matches2_item2, str_replace("d","duoi", $matches2_item2), $input);
+//                            cammomdump($_clone_need_replace);
+//                            cammomdump($_need_replace);
+                            $input = str_replace_first($_clone_need_replace, $_need_replace, $input);
+
                         }
                     }
 
@@ -630,6 +663,15 @@ class GrammarLesson {
 
         }
 
+    }
+
+    private function converOptinalDai(&$dai, &$input){
+        $dai_new = str_replace("dai","d", $dai);
+        $dai_new = str_replace(['hai','ba','bon'],['2','3','4'], $dai_new);
+        $input = str_replace($dai, $dai_new, $input);
+        $dai = $dai_new;
+        $dai = trim($dai);
+//        cammomdump($input);
     }
 
     /*
@@ -648,17 +690,20 @@ class GrammarLesson {
         preg_match_all($queryGetDai, $input, $matches_dai);
 //        cammomdump($all_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
-            showError("Không tìm thấy đài nào phù hợp trong văn bản", ['q'=>$queryGetDai]);
+            showError("Không tìm thấy cú pháp đài+số đánh", ['highlight'=>$input]);
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];
         // cammomdump($matches_dai[1]);
         // chia các đài ra các mảng củ pháp.
         $this->kiemtraDauDuoi($input);
+//        cammomdump($input);
         $cac_cu_phap = [];
+        $this->ConvertOptinalArrayDai($dai_da_tim_thay, $input);
         foreach($dai_da_tim_thay as $indexDai => $dai){
-            if(in_array(trim($dai),['2d','3d','4d'])){
+            if(in_array(trim($dai),OPTIONAL_DAI)){
                 // lấy ra N đài đầu tiên.
+                $this->converOptinalDai($dai, $input);
                 $dai = trim($dai);
                 $number = str_replace("d", "", $dai);
                 $ndai = $this->getNDai();
@@ -695,6 +740,17 @@ class GrammarLesson {
         // cammomdump($data);
 
         return $data;
+    }
+
+    private function ConvertOptinalArrayDai(&$dai_da_tim_thay, &$input){
+        $_new_dai_da_tim_thay = [];
+        foreach($dai_da_tim_thay as $dai){
+            $this->converOptinalDai($dai, $input);
+            $dai = trim($dai);
+            $_new_dai_da_tim_thay[] = $dai;
+        }
+
+        $dai_da_tim_thay = $_new_dai_da_tim_thay;
     }
 
     /*
@@ -782,6 +838,7 @@ class GrammarLesson {
 
             $sokeo_type = $str_len_max."con";
             if($loai_keo == 'khc'){
+                $this->sosanhkeo($min, $max, 2, $sodanh);
                 if($str_len_min < 2){
                     showError("Số kéo hàng chục phải từ 2 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
@@ -793,6 +850,8 @@ class GrammarLesson {
             }
 
             if($loai_keo == 'kht'){
+                $this->sosanhkeo($min, $max, 3, $sodanh);
+
                 if($str_len_min < 3){
                     showError("Số kéo hàng chục phải từ 3 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
@@ -804,6 +863,8 @@ class GrammarLesson {
             }
 
             if($loai_keo == 'khn'){
+                $this->sosanhkeo($min, $max, 4, $sodanh);
+
                 if($str_len_min < 4){
                     showError("Số kéo hàng nghìn phải từ 4 số trở lên", ['highlight'=> "{$min} và {$max}"]);
                     die;
@@ -884,6 +945,22 @@ class GrammarLesson {
             return $result;
         }
         return false;
+    }
+
+
+    private function sosanhkeo($min, $max, $reverse_index, $sodanh){
+        $split_min = str_split($min);
+        $split_max = str_split($max);
+        $index = count($split_min) - $reverse_index;
+        foreach ($split_min as $min_index=>$min_value){
+            foreach($split_max as $max_index=>$max_value){
+                if($min_index != $index && $min_index == $max_index && $min_value != $max_value){
+//                    cammomdump($min_value);
+//                    cammomdump($max_value);
+                    showError("Số kéo sai cú pháp.", ['highlight'=> $sodanh]); die;
+                }
+            }
+        }
     }
 
 
@@ -1007,14 +1084,14 @@ class GrammarLesson {
         $so_dai = count($dai);
         if($so_dai < 2){
             if($this->inputtype != BAC){
-                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
+                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> is_array($dai) ? implode(" ", $dai) : $dai]);
                 die;
             }
         }
         $count_sodanh = count($data);
         $arr_sodanh = [];
         if($count_sodanh < 2){
-            showError("cách chơi đá xiên phải có 2 số trở lên");
+            showError("cách chơi đá xiên phải có 2 số trở lên",['highlight'=> $data[0]['sodanh']]);
             die;
         }
         foreach($data as $daxien_item){
@@ -1127,6 +1204,7 @@ class GrammarLesson {
         if($this->inputtype != null && $this->inputtype == BAC){
             $input = "mienbac ".$input;
         }
+        $this->input = $input;
         $cuphap_da_tach = $this->TachCuPhap($input);
         $this->soDanhArrayToString($cuphap_da_tach);
         $this->tachSodao($cuphap_da_tach);
