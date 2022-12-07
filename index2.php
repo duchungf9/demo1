@@ -32,7 +32,7 @@ function printCombination($arr,
 {
     $data = array();
     combinationUtil($arr, $data, 0,
-                    $n - 1, 0, $r);
+        $n - 1, 0, $r);
 }
 
 
@@ -63,7 +63,7 @@ function combinationUtil($arr, $data, $start,
     {
         $data[$index] = $arr[$i];
         combinationUtil($arr, $data, $i + 1,
-                        $end, $index + 1, $r);
+            $end, $index + 1, $r);
     }
 }
 
@@ -536,24 +536,21 @@ class GrammarLesson {
             }else{
                 if($this->haveN && !in_array($word, $tat_ca_cachdanh)){
                     $pattern_errors = "/.*?(";
+
                     $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
                     $pattern_errors .= $cach_danh[$index];
                     $pattern_errors .= ".*?" .$cach_danh[$index+1];
                     $pattern_errors .= ")/";
                     preg_match($pattern_errors, $this->input, $___e_m);
+//                    cammomdump($pattern_errors);
+//                    cammomdump($___e_m);
                     showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
                     die;
                 }
             }
 
             if(!in_array($word, $tat_ca_cachdanh) && empty($matches_sokeo[0][0])){
-                $pattern_errors = "/.*?(";
-                $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
-                $pattern_errors .= $cach_danh[$index];
-                $pattern_errors .= ".*?" .$cach_danh[$index+1];
-                $pattern_errors .= ")/";
-                preg_match($pattern_errors, $this->input, $___e_m);
-                showError("cách đánh [$word] không hợp lệ", ['highlight'=> $___e_m[0],'a'=>$cach_danh]);
+                showError("Cách đánh [$word] không tồn tại",['highlight'=>$word, 'avaiable'=> $tat_ca_cachdanh,'mmm'=>$mmm]);
                 die;
             }
 
@@ -1084,7 +1081,7 @@ class GrammarLesson {
         $so_dai = count($dai);
         if($so_dai < 2){
             if($this->inputtype != BAC){
-                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> is_array($dai) ? implode(" ", $dai) : $dai]);
+                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
                 die;
             }
         }
