@@ -146,6 +146,7 @@ class GrammarLesson {
         $this->dataDai = $data->data->tendai;
         $this->dataCachDanh = $data->data->cachchoi;
         $this->dataAllDai = $data->data->alldai;
+//        cammomdump($data->data);
     }
 
     private function danhSachDaiHomNay(){
@@ -174,6 +175,7 @@ class GrammarLesson {
 
     private function danhSachAllDai(){
         $data = $this->dataAllDai;
+
         $result = [];
         foreach($data as $item_array){
             foreach($item_array as $items){
@@ -670,7 +672,7 @@ class GrammarLesson {
 
     private function converOptinalDai(&$dai, &$input){
         $dai_new = str_replace("dai","d", $dai);
-        $dai_new = str_replace(['hai','ba','bon'],['2','3','4'], $dai_new);
+        $dai_new = str_replace(['haidai','badai','bondai'],['2','3','4'], $dai_new);
         $input = str_replace($dai, $dai_new, $input);
         $dai = $dai_new;
         $dai = trim($dai);
@@ -681,6 +683,7 @@ class GrammarLesson {
     // phần này sẽ tách cả chuỗi input ra thành từng bộ phận sau đó mới tới các step sau.
     */
     private function TachCuPhap($input){
+        $input =  preg_replace("/(d[234])(d[\d]+)/", "$1 $2", $input); // tách dạng d2d34 -> d2 d34
         // step1: (đài{1,})(số-đánh{1,}|số-kéo)(cách-đánh)(tiền-đánh{1})
         $all_dai = $this->danhSachAllDai();
         $str_all_dai = implode("|", $all_dai);
@@ -689,15 +692,23 @@ class GrammarLesson {
             //(((?<!\d)(kh) ?)+) ??(\d+)?
             $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
         }
-//         cammomdump($queryGetDai);
+        $input = preg_replace_callback($queryGetDai, function($matches_callback){
+                $dai = $matches_callback[0];
+                $dai = preg_replace("/([234])(d) ?([\d]+)/","$1dai $3", $dai);
+                return $dai;
+                
+        }, $input);
         preg_match_all($queryGetDai, $input, $matches_dai);
+
+        // cammomdump($input);
 //        cammomdump($all_dai);
+//        cammomdump($matches_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
             showError("Không tìm thấy cú pháp đài+số đánh", ['highlight'=>$input]);
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];
-        // cammomdump($matches_dai[1]);
+//         cammomdump($matches_dai[1]);
         // chia các đài ra các mảng củ pháp.
         $this->kiemtraDauDuoi($input);
 //        cammomdump($input);
@@ -998,7 +1009,7 @@ class GrammarLesson {
                     }
                     $types = $this->getTypeBySoDanh($strlen."con");
                     if(in_array($_normalItem['cachdanh'], $types) == false){
-                        showError("cách đánh $strlen con không thể đánh {$_normalItem['cachdanh']}");
+                        showError("cách đánh $strlen con không thể đánh {$_normalItem['cachdanh']}",['sodanh'=>$_normalItem['sodanh']]);
                         die;
                     }
                     // trường hợp số thường, không phải số kéo.
@@ -1087,7 +1098,7 @@ class GrammarLesson {
         $so_dai = count($dai);
         if($so_dai < 2){
             if($this->inputtype != BAC){
-                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> $dai]);
+                showError("Số đài trong đá xiên phải từ 2 trở lên",['highlight'=> is_array($dai)? implode(' ',$dai) : $dai]);
                 die;
             }
         }
