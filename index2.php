@@ -684,9 +684,11 @@ class GrammarLesson {
     */
     private function TachCuPhap($input){
         $input =  preg_replace("/(d[\d]+)(d[\d]+)/", "$1 $2", $input); // tách dạng d2d34 -> d2 d34
+
 //        cammomdump($input);
         // step1: (đài{1,})(số-đánh{1,}|số-kéo)(cách-đánh)(tiền-đánh{1})
         $all_dai = $this->danhSachAllDai();
+        $clone_all_dai = $all_dai;
         foreach ($all_dai as $key=>$dai){
             if(in_array($dai,OPTIONAL_DAI)){// trước 2d 3d 4d phải có space, hoặc phải là đầu dòng
                 unset($all_dai[$key]);
@@ -695,6 +697,13 @@ class GrammarLesson {
             }
         }
         $str_all_dai = implode("|", $all_dai);
+        $str_clone_all_dai = implode("|", $clone_all_dai);
+        // kiểm tra text đầu phải là đài.
+        preg_match("/^($str_clone_all_dai)/",$input, $match_starting);
+        if(empty($match_starting[0])){
+            showError("Dữ liệu đầu vào sai", ['highlight'=>$input]);
+            die;
+        }
 //        cammomdump($str_all_dai);
         $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)/";
         if(isset($_GET['type']) && $_GET['type'] == 1){
@@ -707,13 +716,15 @@ class GrammarLesson {
                 return $dai;
                 
         }, $input);
+
+
         preg_match_all($queryGetDai, $input, $matches_dai);
 
         // cammomdump($input);
 //        cammomdump($all_dai);
 //        cammomdump($matches_dai);
         if(!isset($matches_dai[1]) or (isset($matches_dai[1]) && empty($matches_dai[1]))){
-            showError("Không tìm thấy cú pháp đài+số đánh", ['highlight'=>$input]);
+            showError("không tìm thấy đài nào phù hợp", ['highlight'=>$input]);
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];
