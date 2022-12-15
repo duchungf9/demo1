@@ -683,10 +683,19 @@ class GrammarLesson {
     // phần này sẽ tách cả chuỗi input ra thành từng bộ phận sau đó mới tới các step sau.
     */
     private function TachCuPhap($input){
-        $input =  preg_replace("/(d[234])(d[\d]+)/", "$1 $2", $input); // tách dạng d2d34 -> d2 d34
+        $input =  preg_replace("/(d[\d]+)(d[\d]+)/", "$1 $2", $input); // tách dạng d2d34 -> d2 d34
+//        cammomdump($input);
         // step1: (đài{1,})(số-đánh{1,}|số-kéo)(cách-đánh)(tiền-đánh{1})
         $all_dai = $this->danhSachAllDai();
+        foreach ($all_dai as $key=>$dai){
+            if(in_array($dai,OPTIONAL_DAI)){// trước 2d 3d 4d phải có space, hoặc phải là đầu dòng
+                unset($all_dai[$key]);
+                $all_dai[] = " ".$dai;
+                $all_dai[] = "^".$dai;
+            }
+        }
         $str_all_dai = implode("|", $all_dai);
+//        cammomdump($str_all_dai);
         $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)/";
         if(isset($_GET['type']) && $_GET['type'] == 1){
             //(((?<!\d)(kh) ?)+) ??(\d+)?
@@ -694,7 +703,7 @@ class GrammarLesson {
         }
         $input = preg_replace_callback($queryGetDai, function($matches_callback){
                 $dai = $matches_callback[0];
-                $dai = preg_replace("/([234])(d) ?([\d]+)/","$1dai $3", $dai);
+                $dai = preg_replace("/ ([234])(d) ?([\d]+)/","$1dai $3", $dai);
                 return $dai;
                 
         }, $input);
