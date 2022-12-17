@@ -32,7 +32,7 @@ function printCombination($arr,
 {
     $data = array();
     combinationUtil($arr, $data, 0,
-        $n - 1, 0, $r);
+                    $n - 1, 0, $r);
 }
 
 
@@ -63,7 +63,7 @@ function combinationUtil($arr, $data, $start,
     {
         $data[$index] = $arr[$i];
         combinationUtil($arr, $data, $i + 1,
-            $end, $index + 1, $r);
+                        $end, $index + 1, $r);
     }
 }
 
@@ -696,6 +696,8 @@ class GrammarLesson {
                 $all_dai[] = "^".$dai;
             }
         }
+        //        cammomdump($all_dai);
+
         $str_all_dai = implode("|", $all_dai);
         $str_clone_all_dai = implode("|", $clone_all_dai);
         // kiểm tra text đầu phải là đài.
@@ -711,12 +713,12 @@ class GrammarLesson {
             $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
         }
         $input = preg_replace_callback($queryGetDai, function($matches_callback){
-                $dai = $matches_callback[0];
-                $dai = preg_replace("/ ([234])(d) ?([\d]+)/","$1dai $3", $dai);
-                return $dai;
-                
-        }, $input);
+            $dai = $matches_callback[0];
+            $dai = preg_replace("/ ([234])(d) ?([\d]+)/"," $1dai $3", $dai);
+            return $dai;
 
+        }, $input);
+//        cammomdump($input);
 
         preg_match_all($queryGetDai, $input, $matches_dai);
 
