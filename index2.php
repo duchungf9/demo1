@@ -703,7 +703,8 @@ class GrammarLesson {
         // kiểm tra text đầu phải là đài.
         preg_match("/^($str_clone_all_dai)/",$input, $match_starting);
         if(empty($match_starting[0])){
-            showError("Dữ liệu đầu vào sai", ['highlight'=>$input]);
+            preg_match("/^\w+/", $input,$mx);
+            showError("Dữ liệu đầu vào sai", ['highlight'=>isset($mx[0]) ? $mx[0] : $input]);
             die;
         }
 //        cammomdump($str_all_dai);
@@ -730,8 +731,8 @@ class GrammarLesson {
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];
-         cammomdump($matches_dai[1]);
-         cammomdump($queryGetDai);
+//         cammomdump($matches_dai[1]);
+//         cammomdump($queryGetDai);
         // chia các đài ra các mảng củ pháp.
         $this->kiemtraDauDuoi($input);
 //        cammomdump($input);
