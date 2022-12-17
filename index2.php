@@ -708,10 +708,10 @@ class GrammarLesson {
         }
 //        cammomdump($str_all_dai);
         $queryGetDai = "/((($str_all_dai) ?)+) ??(\d+)/";
-        if(isset($_GET['type']) && $_GET['type'] == 1){
-            //(((?<!\d)(kh) ?)+) ??(\d+)?
-            $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/";
-        }
+//        if(isset($_GET['type']) && $_GET['type'] == 1){
+//            //(((?<!\d)(kh) ?)+) ??(\d+)?
+//            $queryGetDai = "/(((?<!\d)($str_all_dai) ?)+) ??(\d+)/"; //@todo: đéo nhớ đài miền nam này là như nào
+//        }
         $input = preg_replace_callback($queryGetDai, function($matches_callback){
             $dai = $matches_callback[0];
             $dai = preg_replace("/ ([234])(d) ?([\d]+)/"," $1dai $3", $dai);
@@ -730,7 +730,8 @@ class GrammarLesson {
             die;
         }
         $dai_da_tim_thay = $matches_dai[1];
-//         cammomdump($matches_dai[1]);
+         cammomdump($matches_dai[1]);
+         cammomdump($queryGetDai);
         // chia các đài ra các mảng củ pháp.
         $this->kiemtraDauDuoi($input);
 //        cammomdump($input);
