@@ -120,7 +120,8 @@ class GrammarLesson {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://ayeshop.com/mobile.php',
+//            CURLOPT_URL => 'https://ayeshop.com/mobile.php',
+            CURLOPT_URL => 'http://bearshoping.com/mobile.php',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -671,8 +672,8 @@ class GrammarLesson {
     }
 
     private function converOptinalDai(&$dai, &$input){
-        $dai_new = str_replace("dai","d", $dai);
-        $dai_new = str_replace(['haidai','badai','bondai'],['2','3','4'], $dai_new);
+        $dai_new = $dai;
+        $dai_new = str_replace(['haidai','badai','bondai','2dai','3dai','4dai'],['2d','3d','4d','2d','3d','4d'], $dai_new);
         $input = str_replace($dai, $dai_new, $input);
         $dai = $dai_new;
         $dai = trim($dai);
