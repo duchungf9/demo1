@@ -15,6 +15,7 @@ class Validator
     CONST ALL_CACHDANH = "dau|dui|duoi|de|dauduoi|dd|daudui|bao|baolo|lo|dat|dathang|dav|daxien|dax|xien|xi|da|dx|dxv|davong|dxvong|dv|baylo|bay|baobaylo|bbaylo|xcdau|xdau|xchudau|xiuchudau|tldau|dauxc|daux|dauxiu|dauxiuchu|dautl|xiudau|xcdaudao|xdaudao|xchudaudao|xiuchudaudao|tldaudao|dauxcd|dauxcdao|dauxd|dauxdao|dauxiud|dauxiudao|dauxiuchud|dauxiuchudao|dautld|dautldao|xiudaudao|daoxiudau|xcdui|xdui|xchudui|xiuchudui|xcduoi|xchuduoi|xduoi|xiuchuduoi|tldui|tlduoi|bacang|cang|duixc|duix|duixiu|duixiuchu|duitl|duoixc|duoix|duoixiu|duoixiuchu|duoitl|xiudui|xiuduoi|xcduidao|xduidao|xchuduidao|xiuchuduidao|tlduidao|tlduoidao|xcduoidao|xduoidao|xchuduoidao|xiuchuduoidao|duixcd|duixcdao|duixd|duixdao|duixiud|duixiudao|duixiuchud|duixiuchudao|duitld|duitldao|duoixcd|duoixcdao|duoixd|duoixdao|duoixiud|duoixiudao|duoixiuchud|duoixiuchudao|duoitld|duoitldao|xiuduidao|xiuduoidao|daoxiuduoi|daoxiuduoi|xc|xchu|xiuchu|x|tl|xieu|xiu|baodao|baolodao|bldao|bdao|lodao|bld|daob|db";
     CONST CHECK_ONE = "/(" . self::ALL_DAI . "|" . self::ALL_CACHDANH . ")\s?(\d+)n?/";
     CONST CHECK_DAI_SODANH = "/(".self::ALL_DAI.")\s?(\d+)/";
+    CONST CHECK_DAI_SODANH_CACHDANH_DAI_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+\s?)+\s(".self::ALL_CACHDANH.")\s(".self::ALL_DAI.")/"; // thiếu tiền đánh
     CONST CHECK_DAI_SODANH_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+ ?)\s?(\d+)n/"; // trường hợp đài + số + tiền có N ( báo thiếu cách đánh )
     CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")\s?(\d+ ?){1,}?\s?(\d+n|".self::ALL_DAI.")/";
     CONST CHECK_SODANH_DOUBLE_FAIL = "/(\d+n) ?(\d+n)/";
@@ -41,6 +42,7 @@ class Validator
         $this->daiSo();
         $this->daiSoSo();
         $this->doubleSoDanh();
+        $this->checkDaiSoCachDai();
         $this->cachTien();
 
 //        echo self::ALL_CACHDANH;
@@ -88,6 +90,17 @@ class Validator
             }
         }
     }
+    private function checkDaiSoCachDai(){ // đài + số + cách đánh + đài
+        preg_match_all(self::CHECK_DAI_SODANH_CACHDANH_DAI_FAIL_1, $this->input, $matches2, PREG_OFFSET_CAPTURE);
+        if (isset($matches2[0]) && count($matches2[0]) > 0) {
+            foreach($matches2[0] as $theMatch){
+                $theMatches = $theMatch;
+                $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Thiếu tiền đánh.'];
+            }
+        }
+    }
+
+
 
     private function cachTien()
     {
