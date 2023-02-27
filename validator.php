@@ -17,7 +17,8 @@ class Validator
     CONST CHECK_DAI_SODANH = "/(".self::ALL_DAI.")\s?(\d+)/";
     CONST CHECK_DAI_SODANH_CACHDANH_DAI_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+\s?)+\s(".self::ALL_CACHDANH.")\s(".self::ALL_DAI.")/"; // thiếu tiền đánh
     CONST CHECK_DAI_SODANH_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+ ?)\s?(\d+)n/"; // trường hợp đài + số + tiền có N ( báo thiếu cách đánh )
-    CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")\s?(\d+ ?){1,}?\s?(\d+n|".self::ALL_DAI.")/";
+    CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")\s?(\d+ ?){1,}?\s?(\d+n|".self::ALL_DAI.")/"; // đài + số đánh + đài ( thiếu cách đánh, tiền đánh )
+    CONST CHECK_DAI_SODANH_FAIL_3 = "/(".self::ALL_DAI.")\s?(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,} ?){1,}?\s?(\d+n|".self::ALL_DAI.")/"; // đài + số kéo + đài ( thiếu cách đánh, tiền đánh )
     CONST CHECK_SODANH_DOUBLE_FAIL = "/(\d+n) ?(\d+n)/";
     // trường hợp đài + số + số thì phải check xem kế tiếp nếu lại là đài hoặc tiền thì cũng sai
 
@@ -52,7 +53,8 @@ class Validator
             $output .= $knowed_item['msg'] . " position: {$knowed_item['start']} tới {$knowed_item['end']} ({$knowed_item['text']})<br/>";
         }
 
-        echo $output;
+        echo $output; die;
+        return $this->knowed;
     }
 
     /*
@@ -73,9 +75,16 @@ class Validator
 
     private function daiSoSo(){
         preg_match_all(self::CHECK_DAI_SODANH_FAIL_2, $this->input, $matches2, PREG_OFFSET_CAPTURE);
+        preg_match_all(self::CHECK_DAI_SODANH_FAIL_3, $this->input, $matches3, PREG_OFFSET_CAPTURE);
         if (isset($matches2[0]) && count($matches2[0]) > 0) {
             foreach($matches2[0] as $theMatch){
                 $theMatches = $theMatch;
+                $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Lỗi thiếu cách đánh.'];
+            }
+        }
+        if (isset($matches3[0]) && count($matches3[0]) > 0) {
+            foreach($matches3[0] as $theMatch3){
+                $theMatches = $theMatch3;
                 $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Lỗi thiếu cách đánh.'];
             }
         }
