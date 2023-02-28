@@ -17,7 +17,7 @@ class Validator
     CONST CHECK_DAI_SODANH = "/(".self::ALL_DAI.")\s?(\d+)/";
     CONST CHECK_DAI_SODANH_CACHDANH_DAI_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+\s?)+\s(".self::ALL_CACHDANH.")\s(".self::ALL_DAI.")/"; // thiếu tiền đánh
     CONST CHECK_DAI_SODANH_FAIL_1 = "/(".self::ALL_DAI.")\s?(\d+ ?)+?\s?(\d+)n/"; // trường hợp đài + số + tiền có N ( báo thiếu cách đánh )
-    CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")\s?(\d+ ?)+?{1,}?\s?(\d+n|".self::ALL_DAI.")/"; // đài + số đánh + đài ( thiếu cách đánh, tiền đánh )
+    CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")\s?(\d+ ?)+?\s?(\d+n|".self::ALL_DAI.")/"; // đài + số đánh + đài ( thiếu cách đánh, tiền đánh )
     CONST CHECK_DAI_SODANH_FAIL_3 = "/(".self::ALL_DAI.")\s?(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,} ?){1,}?\s?(\d+n|".self::ALL_DAI.")/"; // đài + số kéo + đài ( thiếu cách đánh, tiền đánh )
     CONST CHECK_SO_N_TIEN_FAIL = "/(\d+ ){2,}(\d+n)/"; // trường hợp các số liền nhau, kết thúc bằng tiền + N
     CONST CHECK_SODANH_DOUBLE_FAIL = "/(\d+n) ?(\d+n)/";
