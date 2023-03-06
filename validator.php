@@ -11,12 +11,12 @@ class Validator
 
     public $input = null;
     public $knowed = [];
-    CONST ALL_DAI = "tp|tpho|tph|hochiminh|dt|dth|dthap|dongthap|cm|cmau|camau|bt|btre|btr|bentre|vt|vtau|vungtau|bli|blieu|baclieu|dn|dnai|dongnai|ct|ctho|cth|cantho|st|strang|str|soctrang|tn|tninh|tayninh|ag|agiang|angiang|bt|bth|bthuan|binhthuan|vl|vlong|vlog|vinhlong|bd|bduong|sb|sbe|songbe|binhduong|tv|tving|trv|travinh|la|lan|longan|bp|bphuoc|bph|binhphuoc|hg|hgiang|haugiang|tg|tgiang|tiengiang|kg|kgiang|kiengiang|dl|dlat|dalat|haidai|badai|bondai|2d|3d|4d|2dai|3dai|4dai";
+    CONST ALL_DAI = "tp|tpho|tph|hochiminh|dt|dth|dthap|dongthap|cm|cmau|camau|bt|btre|btr|bentre|vt|vtau|vungtau|bli|blieu|baclieu|dn|dnai|dongnai|ct|ctho|cth|cantho|st|strang|str|soctrang|tn|tninh|tayninh|ag|agiang|angiang|bt|bth|bthuan|binhthuan|vl|vlong|vlog|vinhlong|bd|bduong|sb|sbe|songbe|binhduong|tv|tving|trv|travinh|la|lan|longan|bp|bphuoc|bph|binhphuoc|hg|hgiang|haugiang|tg|tgiang|tiengiang|kg|kgiang|kiengiang|dl|dlat|dalat|haidai|badai|bondai|(^|\s)2d|(^|\s)3d|(^|\s)4d|(^|\s)2dai|(^|\s)3dai|(^|\s)4dai";
     CONST ALL_CACHDANH = "dau|dui|duoi|de|dauduoi|dd|daudui|bao|baolo|lo|dat|dathang|dav|daxien|dax|xien|xi|da|dx|dxv|davong|dxvong|dv|baylo|bay|baobaylo|bbaylo|xcdau|xdau|xchudau|xiuchudau|tldau|dauxc|daux|dauxiu|dauxiuchu|dautl|xiudau|xcdaudao|xdaudao|xchudaudao|xiuchudaudao|tldaudao|dauxcd|dauxcdao|dauxd|dauxdao|dauxiud|dauxiudao|dauxiuchud|dauxiuchudao|dautld|dautldao|xiudaudao|daoxiudau|xcdui|xdui|xchudui|xiuchudui|xcduoi|xchuduoi|xduoi|xiuchuduoi|tldui|tlduoi|bacang|cang|duixc|duix|duixiu|duixiuchu|duitl|duoixc|duoix|duoixiu|duoixiuchu|duoitl|xiudui|xiuduoi|xcduidao|xduidao|xchuduidao|xiuchuduidao|tlduidao|tlduoidao|xcduoidao|xduoidao|xchuduoidao|xiuchuduoidao|duixcd|duixcdao|duixd|duixdao|duixiud|duixiudao|duixiuchud|duixiuchudao|duitld|duitldao|duoixcd|duoixcdao|duoixd|duoixdao|duoixiud|duoixiudao|duoixiuchud|duoixiuchudao|duoitld|duoitldao|xiuduidao|xiuduoidao|daoxiuduoi|daoxiuduoi|xc|xchu|xiuchu|x|tl|xieu|xiu|baodao|baolodao|bldao|bdao|lodao|bld|daob|db";
     CONST CHECK_ONE = "/(" . self::ALL_DAI . "|" . self::ALL_CACHDANH . ")\s?(\d+)n?/";
     CONST CHECK_DAI_SODANH = "/(".self::ALL_DAI.")\s?(\d+)/";
     CONST CHECK_DAI_SODANH_CACHDANH_DAI_FAIL_1 = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(\d+\s?)+\s(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")/"; // thiếu tiền đánh
-    CONST NEGATIVE_LOOKING_BACK_FOR_DAI = "(?!a\s?\d+|d|sau|ui|uoi|e|auduoi|dui|audui|ao|aolo|lo|at|athang|av|axien|ax|xien|xi|a|dx|xv|avong|xvong|v|baylo|bay|baobaylo|bbaylo|xcdau|xdau|xchudau|xiuchudau|tldau|auxc|aux|auxiu|auxiuchu|auxiuchudau|autl|xiudau|cdaudao|daudao|chudaudao|iuchudaudao|ldaudao|uxcd|uxcdao|uxd|uxdao|uxiud|uxiudao|uxiuchud|uxiuchudao|autld|iudaudao|aoxiudau)";
+    CONST NEGATIVE_LOOKING_BACK_FOR_DAI = "(?!a\s?\d+|d|sau|ui|uoi|e|auduoi|dui|audui|ao|aolo|lo|at|athang|av|axien|ax|xien|xi|a|x|dx|xv|avong|xvong|v|baylo|bay|baobaylo|bbaylo|xcdau|xdau|xchudau|xiuchudau|tldau|auxc|aux|auxiu|auxiuchu|auxiuchudau|autl|xiudau|cdaudao|daudao|chudaudao|iuchudaudao|ldaudao|uxcd|uxcdao|uxd|uxdao|uxiud|uxiudao|uxiuchud|uxiuchudao|autld|iudaudao|aoxiudau)";
     CONST NEGATIVE_LOOKING_BACK_FOR_CACHDANH = "(?!uong|ao)";
     CONST CHECK_DAI_SODANH_FAIL_1 = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(\d+ ?)+?\s?(\d+)n/"; // trường hợp đài + số + tiền có N ( báo thiếu cách đánh )
     CONST CHECK_DAI_SODANH_FAIL_2 = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(\d+ ?)+?\s?(\d+n|".self::ALL_DAI.")".self::NEGATIVE_LOOKING_BACK_FOR_DAI."/"; // đài + số đánh + đài ( thiếu cách đánh, tiền đánh )
@@ -27,7 +27,7 @@ class Validator
     CONST CHECK_D_N_BLANK_OR_DAI_FAIL_2 = "/(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s?(\d+)n?\s(\d+) ?(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."$/";
     CONST CHECK_D_N_C_D_DN = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}\s?|\d+\s?)+?\s?(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s(\d+n|\d+)\s(\d+n|\d+)\s?$/";
     // trường hợp đài + số + số thì phải check xem kế tiếp nếu lại là đài hoặc tiền thì cũng sai
-
+    CONST ANGIANG_FAIL = "/[^\d|^\s]ag/";
     CONST CHECK_CACHDANH_TIEN = "/(".self::ALL_CACHDANH.")\s?(\d+)/";
 
     public function __construct($input)
@@ -54,6 +54,7 @@ class Validator
         $this->sodanh_n_tien();
         $this->CHECK_D_N_BLANK_OR_DAI_FAIL();
         $this->CHECK_D_N_C_D_DN();
+        $this->ANGIANG_FAIL();
 
 //        echo self::ALL_CACHDANH;
 //        print_r($this->knowed);die;
@@ -132,6 +133,15 @@ class Validator
             foreach($matches2[0] as $theMatch){
                 $theMatches = $theMatch;
                 $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Không thấy cách đánh'];
+            }
+        }
+    }
+    private function ANGIANG_FAIL(){
+        preg_match_all(self::ANGIANG_FAIL, $this->input, $matches2, PREG_OFFSET_CAPTURE);
+        if (isset($matches2[0]) && count($matches2[0]) > 0) {
+            foreach($matches2[0] as $theMatch){
+                $theMatches = $theMatch;
+                $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Đài hoặc số đánh không đúng..'];
             }
         }
     }

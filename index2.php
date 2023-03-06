@@ -1509,7 +1509,10 @@ class GrammarLesson {
         }
         $this->input = $input;
         $validator = new Validator($this->input);
-        $validator->validate();die;
+        $errors = $validator->validate();
+        foreach($errors as $error){
+            showError($error['msg'], ['hilight'=> $error['text'],'start'=>$error['start'], 'end'=>$error['end']]);
+        }
         $cuphap_da_tach = $this->TachCuPhap($input);
         $this->soDanhArrayToString($cuphap_da_tach);
         $this->tachSodao($cuphap_da_tach);
