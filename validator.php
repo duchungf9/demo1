@@ -26,6 +26,8 @@ class Validator
     CONST CHECK_D_N_BLANK_OR_DAI_FAIL = "/(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s?(\d+)n?\s(\d+) ?(".self::ALL_DAI."|$)".self::NEGATIVE_LOOKING_BACK_FOR_DAI."/";
     CONST CHECK_D_N_BLANK_OR_DAI_FAIL_2 = "/(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s?(\d+)n?\s(\d+) ?(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."$/";
     CONST CHECK_D_N_C_D_DN = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(\d{1,}(k|khc|kht|kc|kl|khn)\d{1,}\s?|\d+\s?)+?\s?(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."\s(\d+n|\d+)\s(\d+n|\d+)\s?$/";
+    CONST CHECK_DAI_FAIL_CACHDANH = "/(".self::ALL_DAI.")(".self::NEGATIVE_LOOKING_BACK_FOR_DAI.")\s?(".self::ALL_CACHDANH.")".self::NEGATIVE_LOOKING_BACK_FOR_CACHDANH."/";
+    CONST CHECK_SO_SO_THAPPHAN = "/((\d+ ?)+ ?){3,} \d+\.\d+/"; //10 20 0.5 hoặc 10 20 30 0.5
     // trường hợp đài + số + số thì phải check xem kế tiếp nếu lại là đài hoặc tiền thì cũng sai
     CONST ANGIANG_FAIL = "/[^\d|^\s]ag/";
     CONST CHECK_CACHDANH_TIEN = "/(".self::ALL_CACHDANH.")\s?(\d+)/";
@@ -45,7 +47,8 @@ class Validator
      */
     private function stepOne()
     {
-
+        $this->CHECK_DAI_FAIL_CACHDANH();
+        $this->CHECK_SO_SO_THAPPHAN();
         $this->daiSo();
         $this->daiSoSo();
         $this->doubleSoDanh();
@@ -100,12 +103,33 @@ class Validator
         }
     }
 
+
+
     private function CHECK_D_N_C_D_DN(){
         preg_match_all(self::CHECK_D_N_C_D_DN, $this->input, $matches2, PREG_OFFSET_CAPTURE);
         if (isset($matches2[0]) && count($matches2[0]) > 0) {
             foreach($matches2[0] as $theMatch){
                 $theMatches = $theMatch;
                 $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Số đánh không đúng..'];
+            }
+        }
+    }
+
+    private function CHECK_DAI_FAIL_CACHDANH(){
+        preg_match_all(self::CHECK_DAI_FAIL_CACHDANH, $this->input, $matches2, PREG_OFFSET_CAPTURE);
+        if (isset($matches2[0]) && count($matches2[0]) > 0) {
+            foreach($matches2[0] as $theMatch){
+                $theMatches = $theMatch;
+                $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Thiếu số đánh..'];
+            }
+        }
+    }
+    private function CHECK_SO_SO_THAPPHAN(){
+        preg_match_all(self::CHECK_SO_SO_THAPPHAN, $this->input, $matches2, PREG_OFFSET_CAPTURE);
+        if (isset($matches2[0]) && count($matches2[0]) > 0) {
+            foreach($matches2[0] as $theMatch){
+                $theMatches = $theMatch;
+                $this->knowed[] = ['text'=>$theMatches[0], 'start'=> $theMatches[1] , 'end' => (int)$theMatches[1] + strlen($theMatches[0]), 'type'=>'daiso', 'msg'=>'Lỗi thiếu cách đánh..'];
             }
         }
     }

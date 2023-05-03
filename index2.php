@@ -672,25 +672,25 @@ class GrammarLesson {
                 if(isset($cach_danh[$index-2])){
 
                     $pattern_errors .= ($cach_danh[$index-2]??"").".*?";
-                    var_dump("zxczxczxc");
-                    var_dump(count($cach_danh));
-                    var_dump(max(array_keys($cach_danh)));
+//                    var_dump("zxczxczxc");
+//                    var_dump(count($cach_danh));
+//                    var_dump(max(array_keys($cach_danh)));
 
                     // var_dump($index);
 
-                    var_dump($cach_danh);
-                    var_dump($cach_danh[$index-2]);
-                    var_dump($cach_danh[$index-1]);
-                    var_dump("aasdasda");
-
-                    var_dump($cach_danh[$index+1]);
+//                    var_dump($cach_danh);
+//                    var_dump($cach_danh[$index-2]);
+//                    var_dump($cach_danh[$index-1]);
+//                    var_dump("aasdasda");
+//
+//                    var_dump($cach_danh[$index+1]);
 
                     $pattern_errors .= ($cach_danh[$index-1]??"").".*?";
                     $pattern_errors .= $cach_danh[$index];
-                    var_dump("ffffffffffff");
-                    var_dump(max(array_keys($cach_danh)));
-
-                    var_dump($index + 1);
+//                    var_dump("ffffffffffff");
+//                    var_dump(max(array_keys($cach_danh)));
+//
+//                    var_dump($index + 1);
                     // if(max(array_keys($cach_danh)) != ($index + 1)){
                     //     $pattern_errors .= ".*?" .$cach_danh[$index + 1];
 
@@ -704,16 +704,16 @@ class GrammarLesson {
 
 
                     $pattern_errors .= ")/";
-                    var_dump(                $pattern_errors             );
+//                    var_dump(                $pattern_errors             );
 
                 }else{
 
-                    var_dump("hhhhhhh");
-
-                    var_dump($cach_danh);
-                    var_dump($cach_danh[$index-2]);
-                    var_dump($cach_danh[$index-1]);
-                    var_dump($cach_danh[$index+1]);
+//                    var_dump("hhhhhhh");
+//
+//                    var_dump($cach_danh);
+//                    var_dump($cach_danh[$index-2]);
+//                    var_dump($cach_danh[$index-1]);
+//                    var_dump($cach_danh[$index+1]);
 
                     $pattern_errors .= ($cach_danh[$index-1]??"").".+";//sửa chỗ này, cơ mà vẫn sai, tìm cách sửa để nó chỉ bôi first match
                     $pattern_errors .= $cach_danh[$index];
@@ -721,11 +721,11 @@ class GrammarLesson {
                     $pattern_errors .= ".*?" .$cach_danh[$index + 1];
 
                     $pattern_errors .= ")/";
-                    var_dump(                $pattern_errors             );
+//                    var_dump(                $pattern_errors             );
                 }
 
                 preg_match($pattern_errors, $this->input, $___e_m);
-                $result = ['highlight'=> $___e_m[0],'a'=>$cach_danh,'index'=>$index];
+                $result = ['highlight'=> $___e_m[0] ?? "",'a'=>$cach_danh,'index'=>$index];
                 if(isset($___e_m[1])){
                     $result['highlight'] = $___e_m[1];
                 }
@@ -811,7 +811,20 @@ class GrammarLesson {
             $parrtern = '/[^d]d(\d{1,}\.\d{1,}|\d{1,})n/'; // kiểm tra cú pháp d+số
         }
         // cammomdump($parrtern);
+        preg_match_all($parrtern, $input, $matchesxxx, PREG_OFFSET_CAPTURE);
+        if(count($matchesxxx[0]) >= 3 && isset($matchesxxx[0][0])){
+            $dai_2d3d4d = array("2d", "3d", "4d");
+            foreach($dai_2d3d4d as $key=> $mod){
+                if (!empty($matchesxxx[0][0][0]) && 0 === strpos($matchesxxx[0][0][0], $mod)){
+                    // ta phải tách nó ra chứ làm thế lồn nào khác được đây.
+                    $str = $matchesxxx[0][0][0];
+                    $str = preg_replace('/([2-4]d)(\d+)/', '$1 $2', $str);
+                    $input = substr_replace($input, $str, $matchesxxx[0][0][1], strlen($matchesxxx[0][0][0]));
+                }
+            }
+        }
         preg_match_all($parrtern, $input, $matches);
+
         if(!empty($matches[0][0])){
             $firstMatch_group = $matches[0];
             foreach($firstMatch_group as $key=>$match_item){
@@ -1499,6 +1512,14 @@ class GrammarLesson {
             }
         }
     }
+// Hàm so sánh
+    function cmp($a, $b)
+    {
+        if ($a['start'] == $b['start']) {
+            return 0;
+        }
+        return ($a['start'] < $b['start']) ? -1 : 1;
+    }
 
     public function verify(){
         $input = $_GET['s'];
@@ -1510,6 +1531,7 @@ class GrammarLesson {
         $this->input = $input;
         $validator = new Validator($this->input);
         $errors = $validator->validate();
+        usort($errors, array($this, "cmp"));
         foreach($errors as $error){
             showError($error['msg'], ['hilight'=> $error['text'],'start'=>$error['start'], 'end'=>$error['end']]);
         }
@@ -1519,6 +1541,42 @@ class GrammarLesson {
         foreach($cuphap_da_tach as &$cuphap){
             array_unique($cuphap, SORT_REGULAR);
         }
+        // thêm 1 step nữa check xem có số nào thừa ko.
+        // tìm tất cả các số đánh
+        $regex_timallsodanh = "/(\b\d+(\.\d+)?n?\b)|(\b\d+\.\d+\b)/";
+        preg_match_all($regex_timallsodanh, $this->input, $matches, PREG_OFFSET_CAPTURE);
+        $so = [];
+        $sotien_danh_thuc_te = [];
+        $sodanh_thuc_te = [];
+        $errors_so = [];
+        $errors_so_index = [];
+        if($matches[0]){
+            $so = $matches[0];
+
+            foreach($cuphap_da_tach as $cpdt){
+                foreach($cpdt as $cp){
+                        $_sodanh_tach_array = explode(" ", $cp['sodanh']);
+                        foreach($_sodanh_tach_array as $sdta){
+                            $sodanh_thuc_te[] = $sdta;
+                        }
+//                        $sodanh_thuc_te[] = $cp['sodanh'];
+                        $sotien_danh_thuc_te[] = $cp['tien'];
+                }
+            }
+        }
+
+        foreach($so as $number){
+            $number = str_replace("n","", $number);
+            if(!in_array($number[0], $sodanh_thuc_te) && !in_array($number[0], $sotien_danh_thuc_te)){
+                $errors_so[] = $number[0];
+                $errors_so_index[] = $number[1];
+            }
+        }
+
+       if(count($errors_so) > 0){
+           showError("Số bị thừa ( không nằm trong cú pháp đã tách )", ['hilight'=> $errors_so[0], 'start'=> $errors_so_index[0], 'end'=> $errors_so_index[0] + strlen($errors_so[0])]);
+           die;
+       }
 
         showSuccess($cuphap_da_tach);
         die;
